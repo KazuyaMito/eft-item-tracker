@@ -39,6 +39,8 @@ const fetchTasks = async () => {
           id: `${task.id}_${index}`,
           taskId: task.id,
           itemId: obj.item.id,
+          itemName: obj.item.name,
+          itemIconLink: obj.item.iconLink,
           quantity: obj.count || 1,
           foundInRaid: obj.foundInRaid || false
         })) || []
@@ -74,19 +76,19 @@ const fetchTasks = async () => {
 }
 
 // Initialize tasks on first access
-if (process.client) {
+if (typeof window !== 'undefined') {
   fetchTasks()
 }
 
-export const getTaskById = (id) => {
+export const getTaskById = (id: string) => {
   return eftTasks.find(task => task.id === id)
 }
 
-export const getTasksByTrader = (trader) => {
+export const getTasksByTrader = (trader: string) => {
   return eftTasks.filter(task => task.trader === trader)
 }
 
-export const getTaskRequirements = (taskId) => {
+export const getTaskRequirements = (taskId: string) => {
   const task = getTaskById(taskId)
   return task ? task.requirements : []
 }

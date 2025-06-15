@@ -5,6 +5,7 @@ export interface HideoutStation {
   name: string
   levels: HideoutLevel[]
   normalizedName?: string
+  imageLink?: string
 }
 
 export interface HideoutLevel {
@@ -36,6 +37,7 @@ const fetchHideout = async () => {
       id: station.normalizedName || station.id,
       name: station.name,
       normalizedName: station.normalizedName,
+      imageLink: station.imageLink,
       levels: station.levels?.map((level: any) => ({
         level: level.level,
         constructionTime: level.constructionTime || '0 minutes',
@@ -45,6 +47,8 @@ const fetchHideout = async () => {
           stationId: station.normalizedName || station.id,
           level: level.level,
           itemId: req.item.id,
+          itemName: req.item.name,
+          itemIconLink: req.item.iconLink,
           quantity: req.count || 1
         })) || [],
         benefits: level.crafts?.length ? 
@@ -64,15 +68,15 @@ const fetchHideout = async () => {
 }
 
 // Initialize hideout on first access
-if (process.client) {
+if (typeof window !== 'undefined') {
   fetchHideout()
 }
 
-export const getStationById = (id) => {
+export const getStationById = (id: string) => {
   return hideoutStations.find(station => station.id === id)
 }
 
-export const getStationRequirements = (stationId, level) => {
+export const getStationRequirements = (stationId: string, level: number) => {
   const station = getStationById(stationId)
   if (!station) return []
   
@@ -90,4 +94,13 @@ export const getAllHideoutRequirements = () => {
   })
   
   return requirements
+}
+
+export const getHideoutStationByNormalizedName = (normalizedName: string) => {
+  return hideoutStations.find(station => station.normalizedName === normalizedName)
+}
+
+export const getHideoutStationImageLink = (normalizedName: string) => {
+  const station = getHideoutStationByNormalizedName(normalizedName)
+  return station ? station.imageLink : null
 }

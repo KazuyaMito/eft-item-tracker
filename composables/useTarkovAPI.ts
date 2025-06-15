@@ -61,14 +61,7 @@ export const useTarkovAPI = () => {
           name
           normalizedName
           trader {
-            id
             name
-            normalizedName
-          }
-          map {
-            id
-            name
-            normalizedName
           }
           experience
           wikiLink
@@ -78,98 +71,29 @@ export const useTarkovAPI = () => {
               id
               name
             }
-            status
           }
-          traderLevelRequirements {
+          traderRequirements {
             trader {
-              id
               name
             }
             level
           }
           objectives {
-            id
             type
             description
-            optional
             ... on TaskObjectiveItem {
               item {
                 id
                 name
-                shortName
+                iconLink
               }
               count
               foundInRaid
-            }
-            ... on TaskObjectiveShoot {
-              target
-              count
-              shotType
-              zoneNames
-              bodyParts {
-                id
-                name
-              }
-              usingWeapon {
-                id
-                name
-              }
-              usingWeaponMods {
-                id
-                name
-              }
-              wearing {
-                id
-                name
-              }
-              notWearing {
-                id
-                name
-              }
-              distance {
-                compareMethod
-                value
-              }
-              playerHealthEffect {
-                bodyParts {
-                  id
-                  name
-                }
-                effects {
-                  id
-                  name
-                }
-              }
-            }
-            ... on TaskObjectiveMark {
-              markerItem {
-                id
-                name
-              }
-            }
-            ... on TaskObjectivePlayerLevel {
-              playerLevel
-            }
-            ... on TaskObjectiveExtract {
-              exitStatus
-              zoneNames
-            }
-            ... on TaskObjectiveVisit {
-              zoneNames
-            }
-            ... on TaskObjectiveUseItem {
-              useAny {
-                id
-                name
-              }
-              compareMethod
-              count
             }
           }
           finishRewards {
             traderStanding {
               trader {
-                id
                 name
               }
               standing
@@ -178,39 +102,6 @@ export const useTarkovAPI = () => {
               item {
                 id
                 name
-                shortName
-              }
-              count
-            }
-            offerUnlock {
-              trader {
-                id
-                name
-              }
-              level
-              item {
-                id
-                name
-              }
-            }
-            skillLevelReward {
-              skill {
-                id
-                name
-              }
-              level
-            }
-            traderUnlock {
-              id
-              name
-            }
-          }
-          startRewards {
-            items {
-              item {
-                id
-                name
-                shortName
               }
               count
             }
@@ -229,6 +120,7 @@ export const useTarkovAPI = () => {
           id
           name
           normalizedName
+          imageLink
           levels {
             level
             constructionTime
@@ -238,6 +130,7 @@ export const useTarkovAPI = () => {
                 id
                 name
                 shortName
+                iconLink
               }
               count
             }
@@ -298,67 +191,8 @@ export const useTarkovAPI = () => {
           name
           normalizedName
           description
-          location {
-            id
-            name
-          }
-          resetTime
-          currency {
-            id
-            name
-          }
-          discount
-          levels {
-            level
-            requiredPlayerLevel
-            requiredReputation
-            requiredCommerce
-            payRate
-            insuranceRate
-            repairCostMultiplier
-            barters {
-              id
-              trader {
-                name
-              }
-              level
-              taskUnlock {
-                id
-                name
-              }
-              requiredItems {
-                item {
-                  id
-                  name
-                  shortName
-                }
-                count
-              }
-              rewardItems {
-                item {
-                  id
-                  name
-                  shortName
-                }
-                count
-              }
-            }
-            cashOffers {
-              item {
-                id
-                name
-                shortName
-              }
-              minTraderLevel
-              price
-              currency
-              priceRUB
-              taskUnlock {
-                id
-                name
-              }
-            }
-          }
+          imageLink
+          image4xLink
         }
       }
     `

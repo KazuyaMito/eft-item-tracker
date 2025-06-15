@@ -58,12 +58,19 @@
               class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
             >
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-                  IMG
+                <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                  <img 
+                    v-if="requirement.itemIconLink"
+                    :src="requirement.itemIconLink"
+                    :alt="requirement.itemName || getItemName(requirement.itemId)"
+                    class="w-full h-full object-cover"
+                    @error="$event.target.style.display='none'"
+                  />
+                  <span v-else class="text-xs text-gray-500">IMG</span>
                 </div>
                 <div>
                   <p class="font-medium text-gray-900">
-                    {{ getItemName(requirement.itemId) }}
+                    {{ requirement.itemName || getItemName(requirement.itemId) }}
                   </p>
                   <p class="text-sm text-gray-500">
                     {{ requirement.foundInRaid ? 'Found in Raid' : 'Any condition' }}

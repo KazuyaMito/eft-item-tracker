@@ -47,8 +47,15 @@
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4 flex-1">
-            <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500 flex-shrink-0">
-              IMG
+            <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img 
+                v-if="getItemIconLink(groupedItem.itemId)"
+                :src="getItemIconLink(groupedItem.itemId)"
+                :alt="getItemName(groupedItem.itemId)"
+                class="w-full h-full object-cover"
+                @error="$event.target.style.display='none'"
+              />
+              <span v-else class="text-xs text-gray-500">IMG</span>
             </div>
             
             <div class="flex-1 min-w-0">
@@ -250,6 +257,11 @@ const getItemName = (itemId) => {
   return item ? item.name : itemId
 }
 
+const getItemIconLink = (itemId) => {
+  const item = getItemById(itemId)
+  return item ? item.iconLink : null
+}
+
 const getTraderInitial = (traderName) => {
   if (!traderName) return '?'
   return traderName.charAt(0).toUpperCase()
@@ -257,55 +269,17 @@ const getTraderInitial = (traderName) => {
 
 const getTraderImage = (traderName) => {
   if (!traderName) return ''
-  const traderImageMap = {
-    'Prapor': '/images/traders/Prapor_Portrait.webp',
-    'Therapist': '/images/traders/Therapist_Portrait.webp',
-    'Fence': '/images/traders/Fence_Portrait.webp',
-    'Skier': '/images/traders/Skier_Portrait.webp',
-    'Peacekeeper': '/images/traders/Peacekeeper_Portrait.webp',
-    'Mechanic': '/images/traders/Mechanic_Portrait.webp',
-    'Ragman': '/images/traders/Ragman_Portrait.webp',
-    'Jaeger': '/images/traders/Jaeger_Portrait.webp',
-    'Lightkeeper': '/images/traders/Lightkeeper_Portrait.webp',
-    'Ref': '/images/traders/Ref_Portrait.webp',
-    'BTR Driver': '/images/traders/BTR_Driver_Portrait.webp'
-  }
-  return traderImageMap[traderName] || ''
+  const { getTraderImageLink } = useTraders()
+  return getTraderImageLink(traderName) || ''
 }
 
 const getHideoutImage = (sourceId) => {
   if (!sourceId) return ''
   const stationId = sourceId.split('_')[0]
-  const hideoutImageMap = {
-    'generator': '/images/hideouts/Generator_Portrait.webp',
-    'workbench': '/images/hideouts/Workbench_Portrait.webp',
-    'medstation': '/images/hideouts/Medstation_Portrait.webp',
-    'lavatory': '/images/hideouts/Lavatory_Portrait.webp',
-    'stash': '/images/hideouts/Stash_Portrait.webp',
-    'vents': '/images/hideouts/Vents_Portrait.webp',
-    'water-collector': '/images/hideouts/Water_Collector_Portrait.webp',
-    'heating': '/images/hideouts/Heating_Portrait.webp',
-    'security': '/images/hideouts/Security_Portrait.webp',
-    'illumination': '/images/hideouts/Illumination_Portrait.webp',
-    'bitcoin-farm': '/images/hideouts/Bitcoin_Farm_Portrait.webp',
-    'scav-case': '/images/hideouts/Scav_Case_Portrait.webp',
-    'intelligence-center': '/images/hideouts/Intelligence_Center_Portrait.webp',
-    'shooting-range': '/images/hideouts/Shooting_Range_Portrait.webp',
-    'library': '/images/hideouts/Library_Portrait.webp',
-    'air-filtering': '/images/hideouts/Air_Filtering_Unit_Portrait.webp',
-    'solar-power': '/images/hideouts/Solar_power_Portrait.webp',
-    'booze-generator': '/images/hideouts/Booze_Generator_Portrait.webp',
-    'nutrition-unit': '/images/hideouts/Nutrition_Unit_Portrait.webp',
-    'gym': '/images/hideouts/Gym_Portrait.webp',
-    'rest-space': '/images/hideouts/Rest_Space_Portrait.webp',
-    'weapon-rack': '/images/hideouts/Weapon_Rack_Portrait.webp',
-    'gear-rack': '/images/hideouts/Gear_Rack_Portrait.webp',
-    'hall-of-fame': '/images/hideouts/Hall_of_Fame_Portrait.webp',
-    'christmas-tree': '/images/hideouts/Christmas_Tree_Portrait.webp',
-    'cultist-circle': '/images/hideouts/Cultist_Circle_Portrait.webp',
-    'defective-wall': '/images/hideouts/Defective_Wall_Portrait.webp'
-  }
-  return hideoutImageMap[stationId] || ''
+  
+  // Get image from API
+  const station = hideoutStations.find(s => s.normalizedName === stationId)
+  return station ? station.imageLink || '' : ''
 }
 
 const getHideoutStationName = (sourceId) => {

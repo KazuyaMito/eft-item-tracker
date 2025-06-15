@@ -86,12 +86,19 @@
                     class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                   >
                     <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">
-                        IMG
+                      <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                        <img 
+                          v-if="requirement.itemIconLink"
+                          :src="requirement.itemIconLink"
+                          :alt="requirement.itemName || getItemName(requirement.itemId)"
+                          class="w-full h-full object-cover"
+                          @error="$event.target.style.display='none'"
+                        />
+                        <span v-else class="text-xs text-gray-500">IMG</span>
                       </div>
                       <div>
                         <p class="font-medium text-gray-900">
-                          {{ getItemName(requirement.itemId) }}
+                          {{ requirement.itemName || getItemName(requirement.itemId) }}
                         </p>
                         <p class="text-sm text-gray-500">
                           Found in Raid required
@@ -137,9 +144,21 @@
           class="p-3 bg-gray-50 rounded-lg"
         >
           <div class="flex items-center justify-between">
-            <div>
-              <p class="font-medium text-gray-900">{{ getItemName(itemId) }}</p>
-              <p class="text-sm text-gray-500">Total needed</p>
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                <img 
+                  v-if="getItemIconLink(itemId)"
+                  :src="getItemIconLink(itemId)"
+                  :alt="getItemName(itemId)"
+                  class="w-full h-full object-cover"
+                  @error="$event.target.style.display='none'"
+                />
+                <span v-else class="text-xs text-gray-500">IMG</span>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">{{ getItemName(itemId) }}</p>
+                <p class="text-sm text-gray-500">Total needed</p>
+              </div>
             </div>
             <div class="text-right">
               <div class="text-lg font-semibold" :class="getUserItemCount(itemId, true) >= total ? 'text-green-600' : 'text-red-600'">
@@ -180,6 +199,11 @@ const requiredItemsSummary = computed(() => {
 const getItemName = (itemId) => {
   const item = getItemById(itemId)
   return item ? item.name : itemId
+}
+
+const getItemIconLink = (itemId) => {
+  const item = getItemById(itemId)
+  return item ? item.iconLink : null
 }
 
 const getUserItemCount = (itemId, foundInRaid) => {
