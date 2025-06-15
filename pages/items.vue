@@ -15,21 +15,6 @@
         >
       </div>
       
-      <div class="mb-4 flex flex-wrap gap-2">
-        <button
-          v-for="category in categories"
-          :key="category"
-          @click="selectedCategory = selectedCategory === category ? null : category"
-          :class="[
-            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
-            selectedCategory === category
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          ]"
-        >
-          {{ category }}
-        </button>
-      </div>
     </div>
 
     <div v-if="!user" class="text-center py-8">
@@ -166,14 +151,9 @@ const { user, signInWithGoogle } = useAuth()
 const { updateUserItemCollection, getUserItemCollection } = useFirestore()
 
 const searchQuery = ref('')
-const selectedCategory = ref(null)
 const itemQuantities = ref({})
 const pendingUpdates = ref({})
 
-const categories = computed(() => {
-  const cats = [...new Set(eftItems.map(item => item.category))]
-  return cats.sort()
-})
 
 const itemRequirements = computed(() => {
   const requirements = []
