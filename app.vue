@@ -1,11 +1,12 @@
 <template>
-  <div id="app" class="min-h-screen bg-dark-bg text-dark-text">
+  <div id="app" class="min-h-screen bg-dark-bg text-dark-text flex flex-col">
     <NuxtRouteAnnouncer />
     <Header />
     <TabNavigation />
-    <main class="container mx-auto py-8">
+    <main class="container mx-auto py-8 flex-1">
       <NuxtPage />
     </main>
+    <Footer />
   </div>
 </template>
 
