@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <h1 class="text-2xl font-bold text-gray-900 mb-4">Item Collection</h1>
-      <p class="text-gray-600 mb-6">
+    <div class="bg-dark-card rounded-lg shadow-md p-6">
+      <h1 class="text-2xl font-bold text-dark-text mb-4">Item Collection</h1>
+      <p class="text-dark-text-secondary mb-6">
         Track your Found in Raid items for tasks and hideout upgrades.
       </p>
       
@@ -11,14 +11,14 @@
           v-model="searchQuery"
           type="text"
           placeholder="Search items..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          class="w-full px-4 py-2 bg-dark-surface border border-dark-surface rounded-lg text-dark-text placeholder-dark-text-secondary focus:ring-2 focus:ring-blue-400 focus:border-transparent"
         >
       </div>
       
     </div>
 
     <div v-if="!user" class="text-center py-8">
-      <p class="text-gray-500 mb-4">Please sign in to track your items</p>
+      <p class="text-dark-text-secondary mb-4">Please sign in to track your items</p>
       <button @click="signInWithGoogle" class="btn btn-primary">
         Sign in with Google
       </button>
@@ -28,11 +28,11 @@
       <div
         v-for="groupedItem in groupedItemRequirements"
         :key="groupedItem.itemId"
-        class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
+        class="bg-dark-card rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-4 flex-1">
-            <div class="w-16 h-16 bg-gray-200 rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
               <img 
                 v-if="getItemIconLink(groupedItem.itemId)"
                 :src="getItemIconLink(groupedItem.itemId)"
@@ -40,11 +40,11 @@
                 class="w-full h-full object-cover"
                 @error="$event.target.style.display='none'"
               />
-              <span v-else class="text-xs text-gray-500">IMG</span>
+              <span v-else class="text-xs text-dark-text-secondary">IMG</span>
             </div>
             
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-gray-900 truncate">{{ getItemName(groupedItem.itemId) }}</h3>
+              <h3 class="font-semibold text-dark-text truncate">{{ getItemName(groupedItem.itemId) }}</h3>
               <div class="space-y-1">
                 <div
                   v-for="source in groupedItem.sources"
@@ -64,7 +64,7 @@
                         @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
                       >
                       <div
-                        class="w-full h-full bg-gray-300 rounded-full items-center justify-center text-xs text-gray-600 hidden"
+                        class="w-full h-full bg-dark-surface rounded-full items-center justify-center text-xs text-dark-text-secondary hidden"
                       >
                         {{ getTraderInitial(source.traderName) }}
                       </div>
@@ -81,7 +81,7 @@
                         @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
                       >
                       <div
-                        class="w-full h-full bg-amber-200 rounded items-center justify-center text-xs text-amber-700 hidden"
+                        class="w-full h-full bg-amber-800 rounded items-center justify-center text-xs text-amber-200 hidden"
                       >
                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
@@ -92,8 +92,8 @@
                       :class="[
                         'text-sm truncate px-2 py-1 text-xs rounded',
                         source.source === 'task' 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'bg-green-100 text-green-700'
+                          ? 'bg-blue-900 text-blue-200' 
+                          : 'bg-green-900 text-green-200'
                       ]"
                     >
                       {{ source.sourceName }}
@@ -104,10 +104,10 @@
             </div>
             
             <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-500 mr-2">Found in Raid:</span>
+              <span class="text-sm text-dark-text-secondary mr-2">Found in Raid:</span>
               <button
                 @click="decrementQuantity(groupedItem.itemId)"
-                class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                class="w-8 h-8 rounded-full bg-dark-surface hover:bg-dark-hover flex items-center justify-center transition-colors"
                 :disabled="getCurrentQuantity(groupedItem.itemId) <= 0"
               >
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -121,19 +121,19 @@
                 @blur="saveQuantity(groupedItem.itemId)"
                 type="number"
                 min="0"
-                class="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-surface text-dark-text"
               >
               
               <button
                 @click="incrementQuantity(groupedItem.itemId)"
-                class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors"
+                class="w-8 h-8 rounded-full bg-dark-surface hover:bg-dark-hover flex items-center justify-center transition-colors"
               >
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                 </svg>
               </button>
               
-              <span class="text-sm text-gray-400 ml-2">/ {{ groupedItem.totalQuantity }}</span>
+              <span class="text-sm text-dark-text-secondary ml-2">/ {{ groupedItem.totalQuantity }}</span>
             </div>
           </div>
         </div>

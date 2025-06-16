@@ -1,20 +1,20 @@
 <template>
-  <header class="bg-white shadow-md">
+  <header class="bg-dark-card shadow-lg border-b border-dark-surface">
     <div class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
           <h1 class="text-2xl font-bold text-eft-primary">EFT Tracker</h1>
           <nav class="hidden md:flex space-x-6">
-            <NuxtLink to="/" class="text-gray-600 hover:text-eft-primary transition-colors">
+            <NuxtLink to="/" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
               Dashboard
             </NuxtLink>
-            <NuxtLink to="/items" class="text-gray-600 hover:text-eft-primary transition-colors">
+            <NuxtLink to="/items" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
               Items
             </NuxtLink>
-            <NuxtLink to="/tasks" class="text-gray-600 hover:text-eft-primary transition-colors">
+            <NuxtLink to="/tasks" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
               Tasks
             </NuxtLink>
-            <NuxtLink to="/hideout" class="text-gray-600 hover:text-eft-primary transition-colors">
+            <NuxtLink to="/hideout" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
               Hideout
             </NuxtLink>
           </nav>
@@ -24,7 +24,7 @@
           <div v-if="!loading">
             <div v-if="user" class="flex items-center space-x-4">
               <img :src="user.photoURL" :alt="user.displayName" class="w-8 h-8 rounded-full">
-              <span class="text-sm text-gray-700">{{ user.displayName }}</span>
+              <span class="text-sm text-dark-text">{{ user.displayName }}</span>
               <button 
                 @click="logout" 
                 class="btn btn-secondary text-sm"
@@ -40,7 +40,7 @@
               Sign in with Google
             </button>
           </div>
-          <div v-else class="text-sm text-gray-500">Loading...</div>
+          <div v-else class="text-sm text-dark-text-secondary">Loading...</div>
         </div>
       </div>
     </div>

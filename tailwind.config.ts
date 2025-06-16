@@ -12,9 +12,14 @@ export default <Config>{
   theme: {
     extend: {
       colors: {
-        'eft-primary': '#2D3748',
-        'eft-secondary': '#4A5568', 
-        'eft-accent': '#E53E3E'
+        'eft-primary': '#E2E8F0',
+        'eft-secondary': '#CBD5E0', 
+        'eft-accent': '#F56565',
+        'dark-bg': '#1A202C',
+        'dark-card': '#2D3748',
+        'dark-surface': '#4A5568',
+        'dark-text': '#E2E8F0',
+        'dark-text-secondary': '#CBD5E0'
       }
     }
   }

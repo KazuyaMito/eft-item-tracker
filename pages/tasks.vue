@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <h1 class="text-2xl font-bold text-gray-900 mb-4">Tasks</h1>
-      <p class="text-gray-600 mb-6">
+    <div class="bg-dark-card rounded-lg shadow-md p-6">
+      <h1 class="text-2xl font-bold text-dark-text mb-4">Tasks</h1>
+      <p class="text-dark-text-secondary mb-6">
         Track your progress on trader tasks and see required items.
       </p>
       
@@ -15,7 +15,7 @@
             'px-3 py-1 rounded-full text-sm font-medium transition-colors',
             selectedTrader === trader
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              : 'bg-dark-surface text-dark-text-secondary hover:bg-dark-hover'
           ]"
         >
           {{ trader }}
@@ -24,7 +24,7 @@
     </div>
 
     <div v-if="!user" class="text-center py-8">
-      <p class="text-gray-500 mb-4">Please sign in to track your task progress</p>
+      <p class="text-dark-text-secondary mb-4">Please sign in to track your task progress</p>
       <button @click="signInWithGoogle" class="btn btn-primary">
         Sign in with Google
       </button>
@@ -34,13 +34,13 @@
       <div
         v-for="task in filteredTasks"
         :key="task.id"
-        class="bg-white rounded-lg shadow-md p-6"
+        class="bg-dark-card rounded-lg shadow-md p-6"
       >
         <div class="flex items-start justify-between mb-4">
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ task.name }}</h3>
-            <p class="text-sm text-gray-500">{{ task.trader }} - Level {{ task.level }}</p>
-            <p class="text-gray-600 mt-2">{{ task.description }}</p>
+            <h3 class="text-lg font-semibold text-dark-text">{{ task.name }}</h3>
+            <p class="text-sm text-dark-text-secondary">{{ task.trader }} - Level {{ task.level }}</p>
+            <p class="text-dark-text-secondary mt-2">{{ task.description }}</p>
           </div>
           <div class="text-right">
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
@@ -50,15 +50,15 @@
         </div>
         
         <div class="space-y-3">
-          <h4 class="font-medium text-gray-900">Requirements:</h4>
+          <h4 class="font-medium text-dark-text">Requirements:</h4>
           <div class="space-y-2">
             <div
               v-for="requirement in task.requirements"
               :key="requirement.id"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              class="flex items-center justify-between p-3 bg-dark-surface rounded-lg"
             >
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                <div class="w-10 h-10 bg-dark-surface rounded flex items-center justify-center overflow-hidden">
                   <img 
                     v-if="requirement.itemIconLink"
                     :src="requirement.itemIconLink"
@@ -66,13 +66,13 @@
                     class="w-full h-full object-cover"
                     @error="$event.target.style.display='none'"
                   />
-                  <span v-else class="text-xs text-gray-500">IMG</span>
+                  <span v-else class="text-xs text-dark-text-secondary">IMG</span>
                 </div>
                 <div>
-                  <p class="font-medium text-gray-900">
+                  <p class="font-medium text-dark-text">
                     {{ requirement.itemName || getItemName(requirement.itemId) }}
                   </p>
-                  <p class="text-sm text-gray-500">
+                  <p class="text-sm text-dark-text-secondary">
                     {{ requirement.foundInRaid ? 'Found in Raid' : 'Any condition' }}
                   </p>
                 </div>
@@ -81,7 +81,7 @@
                 <div class="text-lg font-semibold" :class="getProgressClass(requirement)">
                   {{ getUserItemCount(requirement.itemId, requirement.foundInRaid) }} / {{ requirement.quantity }}
                 </div>
-                <div class="text-xs text-gray-500">
+                <div class="text-xs text-dark-text-secondary">
                   {{ getProgressPercentage(requirement) }}% Complete
                 </div>
               </div>
@@ -90,7 +90,7 @@
         </div>
         
         <div class="mt-4 pt-4 border-t">
-          <h4 class="font-medium text-gray-900 mb-2">Rewards:</h4>
+          <h4 class="font-medium text-dark-text mb-2">Rewards:</h4>
           <div class="flex flex-wrap gap-2">
             <span
               v-for="reward in task.rewards"

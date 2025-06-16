@@ -1,28 +1,28 @@
 <template>
-  <nav class="bg-white shadow-sm border-b">
+  <nav class="bg-dark-card shadow-sm border-b border-dark-surface">
     <div class="container mx-auto px-4">
       <div class="flex space-x-8">
         <NuxtLink
           to="/items"
           class="py-4 px-2 border-b-2 font-medium text-sm transition-colors"
-          active-class="border-blue-500 text-blue-600"
-          inactive-class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          active-class="border-blue-400 text-blue-400"
+          inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
         >
           Items
         </NuxtLink>
         <NuxtLink
           to="/tasks"
           class="py-4 px-2 border-b-2 font-medium text-sm transition-colors"
-          active-class="border-blue-500 text-blue-600"
-          inactive-class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          active-class="border-blue-400 text-blue-400"
+          inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
         >
           Tasks
         </NuxtLink>
         <NuxtLink
           to="/hideout"
           class="py-4 px-2 border-b-2 font-medium text-sm transition-colors"
-          active-class="border-blue-500 text-blue-600"
-          inactive-class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          active-class="border-blue-400 text-blue-400"
+          inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
         >
           Hideout
         </NuxtLink>

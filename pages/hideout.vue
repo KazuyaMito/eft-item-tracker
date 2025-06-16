@@ -1,24 +1,24 @@
 <template>
   <div class="space-y-6">
-    <div class="bg-white rounded-lg shadow-md p-6">
+    <div class="bg-dark-card rounded-lg shadow-md p-6">
       <div class="flex items-center justify-between mb-4">
-        <h1 class="text-2xl font-bold text-gray-900">Hideout</h1>
+        <h1 class="text-2xl font-bold text-dark-text">Hideout</h1>
         <div v-if="user" class="text-right">
           <div class="text-lg font-semibold" :class="getOverallProgressClass()">
             {{ getOverallCompletedLevels() }} / {{ getTotalLevels() }} levels
           </div>
-          <div class="text-sm text-gray-500">
+          <div class="text-sm text-dark-text-secondary">
             {{ getOverallProgressPercentage() }}% Complete
           </div>
         </div>
       </div>
-      <p class="text-gray-600 mb-6">
+      <p class="text-dark-text-secondary mb-6">
         Track your hideout upgrade progress and required items.
       </p>
     </div>
 
     <div v-if="!user" class="text-center py-8">
-      <p class="text-gray-500 mb-4">Please sign in to track your hideout progress</p>
+      <p class="text-dark-text-secondary mb-4">Please sign in to track your hideout progress</p>
       <button @click="signInWithGoogle" class="btn btn-primary">
         Sign in with Google
       </button>
@@ -28,19 +28,19 @@
       <div
         v-for="station in hideoutStations"
         :key="station.id"
-        class="bg-white rounded-lg shadow-md p-6"
+        class="bg-dark-card rounded-lg shadow-md p-6"
       >
         <div class="mb-4">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-lg font-semibold text-gray-900">{{ station.name }}</h3>
-              <p class="text-sm text-gray-500">Upgrade Station</p>
+              <h3 class="text-lg font-semibold text-dark-text">{{ station.name }}</h3>
+              <p class="text-sm text-dark-text-secondary">Upgrade Station</p>
             </div>
             <div class="text-right">
               <div class="text-sm font-medium" :class="getStationProgressClass(station)">
                 {{ getStationCompletedLevels(station) }} / {{ station.levels.length }} levels
               </div>
-              <div class="text-xs text-gray-500">
+              <div class="text-xs text-dark-text-secondary">
                 {{ getStationProgressPercentage(station) }}% Complete
               </div>
             </div>
@@ -51,18 +51,18 @@
           <div
             v-for="level in station.levels"
             :key="level.level"
-            class="border border-gray-200 rounded-lg p-4"
+            class="border border-dark-surface rounded-lg p-4"
           >
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center space-x-2">
-                <h4 class="font-medium text-gray-900">Level {{ level.level }}</h4>
+                <h4 class="font-medium text-dark-text">Level {{ level.level }}</h4>
                 <button
                   @click="toggleLevelCompletion(station.id, level.level)"
                   :class="[
                     'w-6 h-6 rounded border-2 flex items-center justify-center transition-colors',
                     isLevelComplete(station.id, level.level)
                       ? 'bg-green-500 border-green-500 text-white'
-                      : 'border-gray-300 hover:border-green-400'
+                      : 'border-dark-surface hover:border-green-400'
                   ]"
                   :title="isLevelComplete(station.id, level.level) ? 'Mark as incomplete' : 'Mark as complete'"
                 >
@@ -71,22 +71,22 @@
                   </svg>
                 </button>
               </div>
-              <span class="text-sm text-gray-500">
+              <span class="text-sm text-dark-text-secondary">
                 Construction Time: {{ level.constructionTime }}
               </span>
             </div>
             
             <div class="space-y-3">
               <div>
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Requirements:</h5>
+                <h5 class="text-sm font-medium text-dark-text mb-2">Requirements:</h5>
                 <div class="space-y-2">
                   <div
                     v-for="requirement in level.requirements"
                     :key="requirement.id"
-                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    class="flex items-center justify-between p-3 bg-dark-surface rounded-lg"
                   >
                     <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                      <div class="w-10 h-10 bg-dark-surface rounded flex items-center justify-center overflow-hidden">
                         <img 
                           v-if="requirement.itemIconLink"
                           :src="requirement.itemIconLink"
@@ -94,13 +94,13 @@
                           class="w-full h-full object-cover"
                           @error="$event.target.style.display='none'"
                         />
-                        <span v-else class="text-xs text-gray-500">IMG</span>
+                        <span v-else class="text-xs text-dark-text-secondary">IMG</span>
                       </div>
                       <div>
-                        <p class="font-medium text-gray-900">
+                        <p class="font-medium text-dark-text">
                           {{ requirement.itemName || getItemName(requirement.itemId) }}
                         </p>
-                        <p class="text-sm text-gray-500">
+                        <p class="text-sm text-dark-text-secondary">
                           Found in Raid required
                         </p>
                       </div>
@@ -109,7 +109,7 @@
                       <div class="text-lg font-semibold" :class="getProgressClass(requirement)">
                         {{ getUserItemCount(requirement.itemId, true) }} / {{ requirement.quantity }}
                       </div>
-                      <div class="text-xs text-gray-500">
+                      <div class="text-xs text-dark-text-secondary">
                         {{ getProgressPercentage(requirement) }}% Complete
                       </div>
                     </div>
@@ -118,12 +118,12 @@
               </div>
               
               <div>
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Benefits:</h5>
+                <h5 class="text-sm font-medium text-dark-text mb-2">Benefits:</h5>
                 <div class="flex flex-wrap gap-2">
                   <span
                     v-for="benefit in level.benefits"
                     :key="benefit"
-                    class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded"
+                    class="inline-block px-2 py-1 text-xs bg-blue-900 text-blue-200 rounded"
                   >
                     {{ benefit }}
                   </span>
@@ -135,17 +135,17 @@
       </div>
     </div>
     
-    <div v-if="user" class="bg-white rounded-lg shadow-md p-6">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">All Required Items Summary</h3>
+    <div v-if="user" class="bg-dark-card rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-semibold text-dark-text mb-4">All Required Items Summary</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
           v-for="(total, itemId) in requiredItemsSummary"
           :key="itemId"
-          class="p-3 bg-gray-50 rounded-lg"
+          class="p-3 bg-dark-surface rounded-lg"
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-              <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+              <div class="w-8 h-8 bg-dark-surface rounded flex items-center justify-center overflow-hidden">
                 <img 
                   v-if="getItemIconLink(itemId)"
                   :src="getItemIconLink(itemId)"
@@ -153,11 +153,11 @@
                   class="w-full h-full object-cover"
                   @error="$event.target.style.display='none'"
                 />
-                <span v-else class="text-xs text-gray-500">IMG</span>
+                <span v-else class="text-xs text-dark-text-secondary">IMG</span>
               </div>
               <div>
-                <p class="font-medium text-gray-900">{{ getItemName(itemId) }}</p>
-                <p class="text-sm text-gray-500">Total needed</p>
+                <p class="font-medium text-dark-text">{{ getItemName(itemId) }}</p>
+                <p class="text-sm text-dark-text-secondary">Total needed</p>
               </div>
             </div>
             <div class="text-right">
