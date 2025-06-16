@@ -33,6 +33,21 @@ export interface TaskRequirement {
   itemId: string
   quantity: number
   foundInRaid: boolean
+  itemName?: string
+  itemIconLink?: string
+}
+
+export interface EFTTask {
+  id: string
+  name: string
+  trader: string
+  level: number
+  description: string
+  objectives?: string[]
+  requirements: TaskRequirement[]
+  rewards: string[]
+  prerequisites?: string[]
+  kappaRequired?: boolean
 }
 
 export interface HideoutRequirement {
@@ -41,4 +56,55 @@ export interface HideoutRequirement {
   level: number
   itemId: string
   quantity: number
+  itemName?: string
+  itemIconLink?: string
+}
+
+export interface HideoutLevel {
+  level: number
+  constructionTime: string
+  requirements: HideoutRequirement[]
+  stationLevelRequirements?: {
+    stationId: string
+    stationName: string
+    level: number
+  }[]
+  skillRequirements?: {
+    skillId: string
+    skillName: string
+    level: number
+  }[]
+  traderRequirements?: {
+    traderId: string
+    traderName: string
+    level: number
+  }[]
+}
+
+export interface HideoutStation {
+  id: string
+  name: string
+  normalizedName?: string
+  imageLink?: string
+  levels: HideoutLevel[]
+}
+
+export interface ItemRequirement {
+  itemId: string
+  quantity: number
+  foundInRaid?: boolean
+}
+
+export interface GroupedItemRequirement {
+  itemId: string
+  itemName: string
+  itemIconLink: string | null
+  sources: {
+    source: 'task' | 'hideout'
+    sourceId: string
+    sourceName: string
+    quantity: number
+    traderName?: string
+  }[]
+  totalQuantity: number
 }

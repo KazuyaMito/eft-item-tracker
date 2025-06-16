@@ -35,9 +35,9 @@
           <div class="flex items-center space-x-4 flex-1">
             <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
               <img 
-                v-if="getItemIconLink(groupedItem.itemId)"
-                :src="getItemIconLink(groupedItem.itemId)"
-                :alt="getItemName(groupedItem.itemId)"
+                v-if="groupedItem.itemIconLink"
+                :src="groupedItem.itemIconLink"
+                :alt="groupedItem.itemName"
                 class="w-full h-full object-cover"
                 @error="$event.target.style.display='none'"
               />
@@ -45,7 +45,7 @@
             </div>
             
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-dark-text truncate">{{ getItemName(groupedItem.itemId) }}</h3>
+              <h3 class="font-semibold text-dark-text truncate">{{ groupedItem.itemName }}</h3>
               <div class="space-y-1">
                 <div
                   v-for="source in groupedItem.sources"
@@ -144,8 +144,10 @@
 </template>
 
 <script setup>
-import { eftItems, searchItems, getItemsByCategory, getItemById } from '~/data/items'
-import { eftTasks } from '~/data/tasks'
+import { computed } from 'vue'
+import { useItemRequirements, filterGroupedItemRequirements } from '~/composables/useItemRequirements'
+import { useItemQuantity } from '~/composables/useItemQuantity'
+import { useDebounce } from '~/composables/useDebounce'
 import { hideoutStations } from '~/data/hideout'
 
 const { user, signInWithGoogle } = useAuth()
@@ -153,148 +155,50 @@ const { updateUserItemCollection, getUserItemCollection } = useFirestore()
 const { showNonKappaTasks } = useSettings()
 
 const searchQuery = ref('')
-const debouncedSearchQuery = ref('')
-const itemQuantities = ref({})
-const pendingUpdates = ref({})
+const { debouncedValue: debouncedSearchQuery, setValue: setDebouncedSearch } = useDebounce('', 300)
 
-// Debounce search input - reduced delay for better responsiveness
-let searchTimeout = null
+// Initialize item requirements composable
+const { baseGroupedItemRequirements } = useItemRequirements({
+  showNonKappaTasks
+})
+
+// Initialize item quantity composable
+const {
+  itemQuantities,
+  getCurrentQuantity,
+  updateQuantity,
+  incrementQuantity,
+  decrementQuantity,
+  saveQuantity: saveQuantityInternal,
+  loadQuantities,
+  clearQuantities
+} = useItemQuantity({
+  onUpdate: async (itemId, quantity) => {
+    if (!user.value) return
+    await updateUserItemCollection(user.value.uid, itemId, {
+      quantity: quantity.total,
+      foundInRaid: quantity.foundInRaid,
+      notes: quantity.notes || ''
+    })
+  }
+})
+
+// Handle search input with debouncing
 const handleSearchInput = (event) => {
   const value = event.target.value
   searchQuery.value = value
-  
-  if (searchTimeout) {
-    clearTimeout(searchTimeout)
-  }
-  searchTimeout = setTimeout(() => {
-    debouncedSearchQuery.value = value
-  }, 300) // Reduced from 500ms to 300ms
+  setDebouncedSearch(value)
 }
 
-
-// Cached base requirements - only recompute when source data changes
-const baseItemRequirements = computed(() => {
-  const requirements = []
-  
-  // Filter tasks based on kappa setting
-  const filteredTasks = showNonKappaTasks.value 
-    ? eftTasks 
-    : eftTasks.filter(task => task.kappaRequired === true)
-  
-  // Add task requirements
-  filteredTasks.forEach(task => {
-    task.requirements.forEach(req => {
-      requirements.push({
-        itemId: req.itemId,
-        quantity: req.quantity,
-        source: 'task',
-        sourceId: task.id,
-        sourceName: task.name,
-        traderName: task.trader
-      })
-    })
-  })
-  
-  // Add hideout requirements
-  hideoutStations.forEach(station => {
-    station.levels.forEach(level => {
-      level.requirements.forEach(req => {
-        requirements.push({
-          itemId: req.itemId,
-          quantity: req.quantity,
-          source: 'hideout',
-          sourceId: `${station.id}_${level.level}`,
-          sourceName: `${station.name} Level ${level.level}`
-        })
-      })
-    })
-  })
-  
-  return requirements
-})
-
-// Grouped requirements without search filter - cache this expensive operation
-const baseGroupedItemRequirements = computed(() => {
-  const grouped = {}
-  
-  baseItemRequirements.value.forEach(req => {
-    if (!grouped[req.itemId]) {
-      grouped[req.itemId] = {
-        itemId: req.itemId,
-        sources: [],
-        totalQuantity: 0,
-        // Cache item data to avoid repeated lookups
-        itemData: getItemById(req.itemId)
-      }
-    }
-    
-    grouped[req.itemId].sources.push({
-      source: req.source,
-      sourceId: req.sourceId,
-      sourceName: req.sourceName,
-      quantity: req.quantity,
-      traderName: req.traderName
-    })
-    
-    grouped[req.itemId].totalQuantity += req.quantity
-  })
-  
-  return Object.values(grouped).sort((a, b) => {
-    const nameA = a.itemData?.name || a.itemId
-    const nameB = b.itemData?.name || b.itemId
-    return nameA.localeCompare(nameB)
-  })
-})
-
-// Apply search filter only to the final grouped results
+// Apply search filter to grouped requirements
 const groupedItemRequirements = computed(() => {
-  if (!debouncedSearchQuery.value) {
-    return baseGroupedItemRequirements.value
-  }
-  
-  const query = debouncedSearchQuery.value.toLowerCase()
-  return baseGroupedItemRequirements.value.filter(groupedItem => {
-    // Use cached item data instead of calling getItemById again
-    const itemName = groupedItem.itemData?.name || groupedItem.itemId
-    
-    // Check if item name matches
-    if (itemName.toLowerCase().includes(query)) {
-      return true
-    }
-    
-    // Check if any source name matches
-    return groupedItem.sources.some(source => 
-      source.sourceName.toLowerCase().includes(query)
-    )
-  })
+  return filterGroupedItemRequirements(
+    baseGroupedItemRequirements.value,
+    debouncedSearchQuery.value
+  )
 })
 
-// Use cached item data from grouped requirements when possible
-const getItemName = (itemId) => {
-  // First check if we have cached data in grouped requirements
-  const cachedItem = baseGroupedItemRequirements.value.find(g => g.itemId === itemId)
-  if (cachedItem?.itemData) {
-    return cachedItem.itemData.name
-  }
-  
-  // Fallback to direct lookup
-  const item = getItemById(itemId)
-  return item ? item.name : itemId
-}
-
-// Use cached item data from grouped requirements when possible
-const getItemIconLink = (itemId) => {
-  // First check if we have cached data in grouped requirements
-  const cachedItem = baseGroupedItemRequirements.value.find(g => g.itemId === itemId)
-  if (cachedItem?.itemData) {
-    return cachedItem.itemData.iconLink
-  }
-  
-  // Fallback to direct lookup
-  const item = getItemById(itemId)
-  return item ? item.iconLink : null
-}
-
+// Helper functions for display
 const getTraderInitial = (traderName) => {
   if (!traderName) return '?'
   return traderName.charAt(0).toUpperCase()
@@ -322,64 +226,13 @@ const getHideoutStationName = (sourceId) => {
   return station ? station.name : 'Hideout'
 }
 
-const getCurrentQuantity = (itemId) => {
-  if (pendingUpdates.value[itemId] !== undefined) {
-    return pendingUpdates.value[itemId]
-  }
-  return itemQuantities.value[itemId]?.foundInRaid || 0
-}
-
-const updateQuantity = (itemId, value) => {
-  const numValue = Math.max(0, parseInt(value) || 0)
-  pendingUpdates.value[itemId] = numValue
-}
-
-const incrementQuantity = (itemId) => {
-  const current = getCurrentQuantity(itemId)
-  pendingUpdates.value[itemId] = current + 1
-  saveQuantity(itemId)
-}
-
-const decrementQuantity = (itemId) => {
-  const current = getCurrentQuantity(itemId)
-  if (current > 0) {
-    pendingUpdates.value[itemId] = current - 1
-    saveQuantity(itemId)
-  }
-}
-
+// Wrapper for saveQuantity to ensure user is authenticated
 const saveQuantity = async (itemId) => {
   if (!user.value) return
-  
-  const newQuantity = pendingUpdates.value[itemId] !== undefined 
-    ? pendingUpdates.value[itemId] 
-    : getCurrentQuantity(itemId)
-  
-  if (!itemQuantities.value[itemId]) {
-    itemQuantities.value[itemId] = {
-      total: newQuantity,
-      foundInRaid: newQuantity,
-      notes: ''
-    }
-  } else {
-    itemQuantities.value[itemId].foundInRaid = newQuantity
-    itemQuantities.value[itemId].total = Math.max(itemQuantities.value[itemId].total, newQuantity)
-  }
-  
-  delete pendingUpdates.value[itemId]
-  
-  try {
-    await updateUserItemCollection(user.value.uid, itemId, {
-      quantity: itemQuantities.value[itemId].total,
-      foundInRaid: itemQuantities.value[itemId].foundInRaid,
-      notes: itemQuantities.value[itemId].notes || ''
-    })
-  } catch (error) {
-    console.error('Failed to update item:', error)
-  }
+  await saveQuantityInternal(itemId)
 }
 
-
+// Load user items from Firestore
 const loadUserItems = async () => {
   if (!user.value) return
   
@@ -395,17 +248,18 @@ const loadUserItems = async () => {
       }
     })
     
-    itemQuantities.value = quantities
+    loadQuantities(quantities)
   } catch (error) {
     console.error('Failed to load user items:', error)
   }
 }
 
+// Watch for user changes
 watch(user, (newUser) => {
   if (newUser) {
     loadUserItems()
   } else {
-    itemQuantities.value = {}
+    clearQuantities()
   }
 }, { immediate: true })
 
