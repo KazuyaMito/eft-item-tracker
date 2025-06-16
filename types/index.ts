@@ -48,6 +48,7 @@ export interface EFTTask {
   rewards: string[]
   prerequisites?: string[]
   kappaRequired?: boolean
+  parallelTaskIds?: string[]
 }
 
 export interface HideoutRequirement {

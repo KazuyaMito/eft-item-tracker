@@ -19,6 +19,7 @@ export const useFirestore = () => {
       const userRef = doc($firebase.db, 'users', userId)
       await setDoc(userRef, {
         ...userData,
+        playerLevel: 1,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       })
@@ -256,6 +257,35 @@ export const useFirestore = () => {
     }
   }
 
+  const savePlayerLevel = async (userId, level) => {
+    try {
+      const userRef = doc($firebase.db, 'users', userId)
+      await updateDoc(userRef, {
+        playerLevel: level,
+        updatedAt: serverTimestamp()
+      })
+    } catch (error) {
+      console.error('Error saving player level:', error)
+      throw error
+    }
+  }
+
+  const getPlayerLevel = async (userId) => {
+    try {
+      const userRef = doc($firebase.db, 'users', userId)
+      const docSnap = await getDoc(userRef)
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        return data.playerLevel || 1
+      }
+      return 1
+    } catch (error) {
+      console.error('Error getting player level:', error)
+      return 1
+    }
+  }
+
   return {
     createUserProfile,
     updateUserItemCollection,
@@ -270,6 +300,8 @@ export const useFirestore = () => {
     getUserTaskObjectives,
     saveCompletedTask,
     getCompletedTasks,
-    reduceItemsForTask
+    reduceItemsForTask,
+    savePlayerLevel,
+    getPlayerLevel
   }
 }
