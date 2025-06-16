@@ -149,6 +149,7 @@ import { hideoutStations } from '~/data/hideout'
 
 const { user, signInWithGoogle } = useAuth()
 const { updateUserItemCollection, getUserItemCollection } = useFirestore()
+const { showNonKappaTasks } = useSettings()
 
 const searchQuery = ref('')
 const itemQuantities = ref({})
@@ -158,8 +159,13 @@ const pendingUpdates = ref({})
 const itemRequirements = computed(() => {
   const requirements = []
   
+  // Filter tasks based on kappa setting
+  const filteredTasks = showNonKappaTasks.value 
+    ? eftTasks 
+    : eftTasks.filter(task => task.kappaRequired === true)
+  
   // Add task requirements
-  eftTasks.forEach(task => {
+  filteredTasks.forEach(task => {
     task.requirements.forEach(req => {
       requirements.push({
         itemId: req.itemId,

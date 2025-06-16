@@ -105,12 +105,59 @@ export const useFirestore = () => {
     }
   }
 
+  const saveUserSettings = async (userId, settings) => {
+    try {
+      const settingsRef = doc($firebase.db, 'userSettings', userId)
+      await setDoc(settingsRef, {
+        ...settings,
+        updatedAt: serverTimestamp()
+      }, { merge: true })
+    } catch (error) {
+      console.error('Error saving user settings:', error)
+      throw error
+    }
+  }
+
+  const getUserSettings = async (userId) => {
+    try {
+      const settingsRef = doc($firebase.db, 'userSettings', userId)
+      const docSnap = await getDoc(settingsRef)
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        delete data.updatedAt
+        return data
+      }
+      return {}
+    } catch (error) {
+      console.error('Error getting user settings:', error)
+      throw error
+    }
+  }
+
+  const watchUserSettings = (userId, callback) => {
+    const settingsRef = doc($firebase.db, 'userSettings', userId)
+    
+    return onSnapshot(settingsRef, (doc) => {
+      if (doc.exists()) {
+        const data = doc.data()
+        delete data.updatedAt
+        callback(data)
+      } else {
+        callback({})
+      }
+    })
+  }
+
   return {
     createUserProfile,
     updateUserItemCollection,
     getUserItemCollection,
     watchUserItemCollection,
     saveUserHideoutProgress,
-    getUserHideoutProgress
+    getUserHideoutProgress,
+    saveUserSettings,
+    getUserSettings,
+    watchUserSettings
   }
 }

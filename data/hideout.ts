@@ -11,10 +11,30 @@ export interface HideoutStation {
 export interface HideoutLevel {
   level: number
   requirements: HideoutRequirement[]
-  benefits: string[]
+  stationLevelRequirements: StationLevelRequirement[]
+  skillRequirements: SkillRequirement[]
+  traderRequirements: TraderRequirement[]
   constructionTime: string
   description?: string
   crafts?: any[]
+}
+
+export interface StationLevelRequirement {
+  stationId: string
+  stationName: string
+  level: number
+}
+
+export interface SkillRequirement {
+  skillId: string
+  skillName: string
+  level: number
+}
+
+export interface TraderRequirement {
+  traderId: string
+  traderName: string
+  level: number
 }
 
 let cachedStations: any[] = []
@@ -32,6 +52,12 @@ const fetchHideout = async () => {
   try {
     const { getHideout } = useTarkovAPI()
     const stations = await getHideout()
+    
+    // Create a map of API ID to normalizedName for station requirements
+    const idToNormalizedMap = new Map()
+    stations.forEach((station: any) => {
+      idToNormalizedMap.set(station.id, station.normalizedName || station.id)
+    })
     
     cachedStations = stations.map((station: any) => ({
       id: station.normalizedName || station.id,
@@ -51,9 +77,21 @@ const fetchHideout = async () => {
           itemIconLink: req.item.iconLink,
           quantity: req.count || 1
         })) || [],
-        benefits: level.crafts?.length ? 
-          [`Can craft ${level.crafts.length} items`] : 
-          [level.description || 'Station functionality'],
+        stationLevelRequirements: level.stationLevelRequirements?.map((req: any) => ({
+          stationId: idToNormalizedMap.get(req.station.id) || req.station.id,
+          stationName: req.station.name,
+          level: req.level
+        })) || [],
+        skillRequirements: level.skillRequirements?.map((req: any) => ({
+          skillId: req.skill.id,
+          skillName: req.skill.name,
+          level: req.level
+        })) || [],
+        traderRequirements: level.traderRequirements?.map((req: any) => ({
+          traderId: req.trader.id,
+          traderName: req.trader.name,
+          level: req.level
+        })) || [],
         crafts: level.crafts || []
       })) || []
     }))

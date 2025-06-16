@@ -8,6 +8,7 @@ export interface EFTTask {
   requirements: TaskRequirement[]
   rewards: string[]
   description: string
+  kappaRequired?: boolean
   normalizedName?: string
   wikiLink?: string
   objectives?: string[]
@@ -59,6 +60,7 @@ const fetchTasks = async () => {
           ) || [])
         ],
         description: task.objectives?.[0]?.description || task.name,
+        kappaRequired: task.kappaRequired === true,
         normalizedName: task.normalizedName,
         wikiLink: task.wikiLink,
         taskRequirements: task.taskRequirements || [],

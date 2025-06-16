@@ -112,6 +112,7 @@ import { getItemById } from '~/data/items'
 
 const { user, signInWithGoogle } = useAuth()
 const { getUserItemCollection } = useFirestore()
+const { showNonKappaTasks } = useSettings()
 
 const selectedTrader = ref(null)
 const userItems = ref({})
@@ -122,10 +123,14 @@ const traders = computed(() => {
 })
 
 const filteredTasks = computed(() => {
-  if (selectedTrader.value) {
-    return getTasksByTrader(selectedTrader.value)
+  let tasks = selectedTrader.value ? getTasksByTrader(selectedTrader.value) : eftTasks
+  
+  // Apply non-Kappa filter if setting is disabled
+  if (!showNonKappaTasks.value) {
+    tasks = tasks.filter(task => task.kappaRequired === true)
   }
-  return eftTasks
+  
+  return tasks
 })
 
 const getItemName = (itemId) => {

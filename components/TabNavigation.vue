@@ -26,6 +26,14 @@
         >
           Hideout
         </NuxtLink>
+        <NuxtLink
+          to="/settings"
+          class="py-4 px-2 border-b-2 font-medium text-sm transition-colors"
+          active-class="border-blue-400 text-blue-400"
+          inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
+        >
+          Settings
+        </NuxtLink>
       </div>
     </div>
   </nav>

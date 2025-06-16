@@ -66,6 +66,7 @@ export const useTarkovAPI = () => {
           experience
           wikiLink
           minPlayerLevel
+          kappaRequired
           taskRequirements {
             task {
               id
