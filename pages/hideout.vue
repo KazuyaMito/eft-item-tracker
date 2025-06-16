@@ -71,14 +71,32 @@
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-lg font-semibold text-dark-text">{{ station.name }}</h3>
-              <p class="text-sm text-dark-text-secondary">Upgrade Station</p>
+              <p class="text-sm text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
             </div>
-            <div class="text-right">
-              <div class="text-sm font-medium" :class="getStationProgressClass(station)">
-                {{ getStationCompletedLevels(station) }} / {{ station.levels.length }} levels
+            <div class="flex items-center space-x-4">
+              <div class="text-right">
+                <div class="text-sm font-medium" :class="getStationProgressClass(station)">
+                  {{ getStationCompletedLevels(station) }} / {{ station.levels.length }} levels
+                </div>
+                <div class="text-xs text-dark-text-secondary">
+                  {{ getStationProgressPercentage(station) }}% Complete
+                </div>
               </div>
-              <div class="text-xs text-dark-text-secondary">
-                {{ getStationProgressPercentage(station) }}% Complete
+              <div class="flex items-center space-x-2">
+                <button
+                  v-if="canUpgradeStation(station)"
+                  @click="upgradeStation(station.id, getStationCurrentLevel(station.id) + 1)"
+                  class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                >
+                  Upgrade to Level {{ getStationCurrentLevel(station.id) + 1 }}
+                </button>
+                <button
+                  v-if="getStationCurrentLevel(station.id) > 0"
+                  @click="downgradeStation(station.id, getStationCurrentLevel(station.id) - 1)"
+                  class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors"
+                >
+                  Downgrade
+                </button>
               </div>
             </div>
           </div>
@@ -94,38 +112,24 @@
             ]"
           >
             <div class="flex items-center justify-between mb-3">
-              <div class="flex items-center space-x-2">
+              <div>
                 <h4 class="font-medium text-dark-text">Level {{ level.level }}</h4>
-                <button
-                  @click="toggleLevelCompletion(station.id, level.level)"
-                  :disabled="!isLevelBuildable(station.id, level)"
-                  :class="[
-                    'w-6 h-6 rounded border-2 flex items-center justify-center transition-colors',
-                    isLevelComplete(station.id, level.level)
-                      ? 'bg-green-500 border-green-500 text-white'
-                      : isLevelBuildable(station.id, level)
-                        ? 'border-dark-surface hover:border-green-400'
-                        : 'border-gray-600 cursor-not-allowed opacity-50'
-                  ]"
-                  :title="isLevelComplete(station.id, level.level) ? 'Mark as incomplete' : isLevelBuildable(station.id, level) ? 'Mark as complete' : 'Prerequisites not met'"
-                >
-                  <svg v-if="isLevelComplete(station.id, level.level)" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-              <div class="text-right">
                 <span class="text-sm text-dark-text-secondary">
                   Construction Time: {{ level.constructionTime }}
                 </span>
-                <div v-if="!isLevelBuildable(station.id, level) && !isLevelComplete(station.id, level.level)" class="text-xs text-red-400 mt-1">
-                  Prerequisites not met
+              </div>
+              <div class="text-right">
+                <div v-if="getStationCurrentLevel(station.id) === level.level" class="text-green-400 text-sm font-medium">
+                  Current Level
                 </div>
-                <div v-else-if="isLevelComplete(station.id, level.level)" class="text-xs text-green-400 mt-1">
+                <div v-else-if="getStationCurrentLevel(station.id) > level.level" class="text-green-400 text-sm">
                   Completed
                 </div>
-                <div v-else-if="isLevelBuildable(station.id, level)" class="text-xs text-blue-400 mt-1">
+                <div v-else-if="getStationCurrentLevel(station.id) === level.level - 1 && isLevelBuildable(station.id, level)" class="text-blue-400 text-sm">
                   Ready to build
+                </div>
+                <div v-else-if="!isLevelBuildable(station.id, level)" class="text-red-400 text-sm">
+                  Prerequisites not met
                 </div>
               </div>
             </div>
@@ -240,6 +244,7 @@ const { getUserItemCollection, saveUserHideoutProgress, getUserHideoutProgress }
 
 const userItems = ref({})
 const hideoutProgress = ref({})
+const stationLevels = ref({}) // Store current level for each station
 const currentFilter = ref('available')
 
 const getItemName = (itemId) => {
@@ -275,35 +280,43 @@ const getProgressPercentage = (requirement) => {
   return Math.min(Math.round((current / needed) * 100), 100)
 }
 
-const isLevelComplete = (stationId, level) => {
-  return hideoutProgress.value[`${stationId}_${level}`] === true
+const getStationCurrentLevel = (stationId) => {
+  return stationLevels.value[stationId] || 0
 }
 
-const toggleLevelCompletion = async (stationId, level) => {
+const isLevelComplete = (stationId, level) => {
+  return getStationCurrentLevel(stationId) >= level
+}
+
+const upgradeStation = async (stationId, newLevel) => {
   if (!user.value) return
   
-  // Find the level object to check if it's buildable
   const station = hideoutStations.find(s => s.id === stationId)
   if (!station) return
   
-  const levelObj = station.levels.find(l => l.level === level)
-  if (!levelObj) return
+  const levelObj = station.levels.find(l => l.level === newLevel)
+  if (!levelObj || !isLevelBuildable(stationId, levelObj)) return
   
-  // Don't allow toggling if level is not buildable (unless already complete)
-  if (!isLevelBuildable(stationId, levelObj) && !isLevelComplete(stationId, level)) {
-    return
-  }
-  
-  const key = `${stationId}_${level}`
-  const newStatus = !hideoutProgress.value[key]
-  
-  hideoutProgress.value[key] = newStatus
+  stationLevels.value[stationId] = newLevel
   
   try {
-    await saveUserHideoutProgress(user.value.uid, key, newStatus)
+    await saveUserHideoutProgress(user.value.uid, stationId, newLevel)
   } catch (error) {
     console.error('Failed to save hideout progress:', error)
-    hideoutProgress.value[key] = !newStatus
+    stationLevels.value[stationId] = newLevel - 1
+  }
+}
+
+const downgradeStation = async (stationId, newLevel) => {
+  if (!user.value) return
+  
+  stationLevels.value[stationId] = newLevel
+  
+  try {
+    await saveUserHideoutProgress(user.value.uid, stationId, newLevel)
+  } catch (error) {
+    console.error('Failed to save hideout progress:', error)
+    stationLevels.value[stationId] = newLevel + 1
   }
 }
 
@@ -346,7 +359,7 @@ const getOverallProgressClass = () => {
 
 // Check if a station level is complete
 const isStationLevelComplete = (stationId, level) => {
-  return hideoutProgress.value[`${stationId}_${level}`] === true
+  return getStationCurrentLevel(stationId) >= level
 }
 
 // Check if all station level requirements are met
@@ -378,6 +391,19 @@ const isLevelBuildable = (stationId, level) => {
   
   // Check station level requirements
   return areStationRequirementsMet(level.stationLevelRequirements)
+}
+
+// Check if station can be upgraded
+const canUpgradeStation = (station) => {
+  const currentLevel = getStationCurrentLevel(station.id)
+  const nextLevel = currentLevel + 1
+  
+  // Check if next level exists
+  const nextLevelObj = station.levels.find(l => l.level === nextLevel)
+  if (!nextLevelObj) return false
+  
+  // Check if next level is buildable
+  return isLevelBuildable(station.id, nextLevelObj)
 }
 
 // Filter management
@@ -496,6 +522,23 @@ const loadHideoutProgress = async () => {
   try {
     const progress = await getUserHideoutProgress(user.value.uid)
     hideoutProgress.value = progress || {}
+    
+    // Convert old boolean format to new level format
+    const levels = {}
+    Object.keys(progress || {}).forEach(key => {
+      if (key.includes('_')) {
+        // Old format: stationId_level -> boolean
+        const [stationId, level] = key.split('_')
+        if (progress[key] === true) {
+          levels[stationId] = Math.max(levels[stationId] || 0, parseInt(level))
+        }
+      } else {
+        // New format: stationId -> currentLevel
+        levels[key] = progress[key]
+      }
+    })
+    
+    stationLevels.value = levels
   } catch (error) {
     console.error('Failed to load hideout progress:', error)
   }
@@ -508,6 +551,7 @@ watch(user, (newUser) => {
   } else {
     userItems.value = {}
     hideoutProgress.value = {}
+    stationLevels.value = {}
   }
 }, { immediate: true })
 

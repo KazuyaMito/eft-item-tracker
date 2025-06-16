@@ -149,6 +149,113 @@ export const useFirestore = () => {
     })
   }
 
+  const saveUserTaskObjectives = async (userId, objectiveKey, completed) => {
+    try {
+      const objectivesRef = doc($firebase.db, 'userTaskObjectives', userId)
+      await setDoc(objectivesRef, {
+        [objectiveKey]: completed,
+        updatedAt: serverTimestamp()
+      }, { merge: true })
+    } catch (error) {
+      console.error('Error saving task objective:', error)
+      throw error
+    }
+  }
+
+  const getUserTaskObjectives = async (userId) => {
+    try {
+      const objectivesRef = doc($firebase.db, 'userTaskObjectives', userId)
+      const docSnap = await getDoc(objectivesRef)
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        delete data.updatedAt
+        return data
+      }
+      return {}
+    } catch (error) {
+      console.error('Error getting task objectives:', error)
+      throw error
+    }
+  }
+
+  const saveCompletedTask = async (userId, taskId, completed) => {
+    try {
+      const tasksRef = doc($firebase.db, 'userCompletedTasks', userId)
+      await setDoc(tasksRef, {
+        [taskId]: completed,
+        updatedAt: serverTimestamp()
+      }, { merge: true })
+    } catch (error) {
+      console.error('Error saving completed task:', error)
+      throw error
+    }
+  }
+
+  const getCompletedTasks = async (userId) => {
+    try {
+      const tasksRef = doc($firebase.db, 'userCompletedTasks', userId)
+      const docSnap = await getDoc(tasksRef)
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        delete data.updatedAt
+        return data
+      }
+      return {}
+    } catch (error) {
+      console.error('Error getting completed tasks:', error)
+      throw error
+    }
+  }
+
+  const reduceItemsForTask = async (userId, requirements) => {
+    try {
+      // Process each requirement and reduce the quantities
+      for (const requirement of requirements) {
+        const itemRef = doc($firebase.db, 'userItems', `${userId}_${requirement.itemId}`)
+        const itemDoc = await getDoc(itemRef)
+        
+        if (itemDoc.exists()) {
+          const currentData = itemDoc.data()
+          const currentQuantity = currentData.quantity || 0
+          const currentFIR = currentData.foundInRaid || 0
+          
+          let newQuantity = currentQuantity
+          let newFIR = currentFIR
+          
+          if (requirement.foundInRaid) {
+            // Reduce FIR items
+            newFIR = Math.max(0, currentFIR - requirement.quantity)
+            // Also reduce from total quantity
+            newQuantity = Math.max(0, currentQuantity - requirement.quantity)
+          } else {
+            // Reduce any items (prioritize non-FIR)
+            const nonFIRItems = currentQuantity - currentFIR
+            if (nonFIRItems >= requirement.quantity) {
+              // Have enough non-FIR items
+              newQuantity = currentQuantity - requirement.quantity
+            } else {
+              // Need to use some FIR items too
+              newQuantity = Math.max(0, currentQuantity - requirement.quantity)
+              const firItemsUsed = requirement.quantity - nonFIRItems
+              newFIR = Math.max(0, currentFIR - firItemsUsed)
+            }
+          }
+          
+          await updateDoc(itemRef, {
+            quantity: newQuantity,
+            foundInRaid: newFIR,
+            updatedAt: serverTimestamp()
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error reducing items for task:', error)
+      throw error
+    }
+  }
+
   return {
     createUserProfile,
     updateUserItemCollection,
@@ -158,6 +265,11 @@ export const useFirestore = () => {
     getUserHideoutProgress,
     saveUserSettings,
     getUserSettings,
-    watchUserSettings
+    watchUserSettings,
+    saveUserTaskObjectives,
+    getUserTaskObjectives,
+    saveCompletedTask,
+    getCompletedTasks,
+    reduceItemsForTask
   }
 }
