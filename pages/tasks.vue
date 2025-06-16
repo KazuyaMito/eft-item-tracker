@@ -6,19 +6,151 @@
         Track your progress on trader tasks and see required items.
       </p>
       
-      <div class="mb-4 flex flex-wrap gap-2">
+      <!-- Category filters and trader selection -->
+      <div class="flex gap-2 mb-4">
+        <!-- ALL/TRADERS buttons section -->
+        <div class="bg-dark-surface rounded-lg p-2 flex gap-2 flex-shrink-0">
+          <button
+            @click="selectedCategory = 'all'; selectedTrader = null"
+            :class="[
+              'flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
+              selectedCategory === 'all'
+                ? 'bg-dark-hover text-white'
+                : 'text-dark-text-secondary hover:text-white'
+            ]"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            ALL
+          </button>
+          <button
+            @click="selectedCategory = 'traders'"
+            :class="[
+              'flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
+              selectedCategory === 'traders'
+                ? 'bg-dark-hover text-white'
+                : 'text-dark-text-secondary hover:text-white'
+            ]"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            TRADERS
+          </button>
+        </div>
+        
+        <!-- Trader selection area (separate background) -->
+        <div class="flex-1 bg-dark-hover rounded-lg p-2 min-w-0 flex items-center justify-center">
+          <div v-if="selectedCategory === 'all'" class="text-center">
+            <p class="text-sm text-dark-text-secondary uppercase tracking-wider">Showing All Sources</p>
+          </div>
+          
+          <div v-else-if="selectedCategory === 'traders'" class="w-full flex items-center gap-1 min-w-0">
+            <button
+              class="text-dark-text-secondary hover:text-white p-1 flex-shrink-0 transition-colors"
+              @click="scrollTraders('left')"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <div ref="traderScroll" class="flex gap-2 flex-nowrap overflow-x-hidden scrollbar-hide flex-1 scroll-smooth min-w-0">
+              <button
+                v-for="trader in traders"
+                :key="trader"
+                @click="selectedTrader = selectedTrader === trader ? null : trader"
+                :class="[
+                  'flex items-center gap-2 px-3 py-1 rounded text-xs font-medium transition-colors flex-shrink-0',
+                  selectedTrader === trader
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-dark-surface text-dark-text-secondary hover:bg-dark-surface'
+                ]"
+              >
+                <div class="w-6 h-6 bg-dark-card rounded-full flex items-center justify-center overflow-hidden">
+                  <img 
+                    v-if="getTraderImage(trader)"
+                    :src="getTraderImage(trader)"
+                    :alt="trader"
+                    class="w-full h-full object-cover"
+                    @error="$event.target.style.display='none'"
+                  />
+                  <span v-else class="text-[10px] font-bold">{{ trader.substring(0, 2).toUpperCase() }}</span>
+                </div>
+                <span class="uppercase">{{ trader }}</span>
+              </button>
+            </div>
+            
+            <button
+              class="text-dark-text-secondary hover:text-white p-1 flex-shrink-0 transition-colors"
+              @click="scrollTraders('right')"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Status filters -->
+      <div class="flex gap-2 mb-4">
         <button
-          v-for="trader in traders"
-          :key="trader"
-          @click="selectedTrader = selectedTrader === trader ? null : trader"
+          @click="selectedFilter = 'available'"
           :class="[
-            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
-            selectedTrader === trader
-              ? 'bg-blue-600 text-white'
-              : 'bg-dark-surface text-dark-text-secondary hover:bg-dark-hover'
+            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            selectedFilter === 'available'
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
           ]"
         >
-          {{ trader }}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          AVAILABLE
+        </button>
+        <button
+          @click="selectedFilter = 'locked'"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            selectedFilter === 'locked'
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
+          ]"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          LOCKED
+        </button>
+        <button
+          @click="selectedFilter = 'completed'"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            selectedFilter === 'completed'
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
+          ]"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+          </svg>
+          COMPLETED
+        </button>
+        
+        <div class="flex-1"></div>
+        
+        <button
+          @click="selectedFilter = 'all'"
+          :class="[
+            'px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            selectedFilter === 'all'
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
+          ]"
+        >
+          ALL
         </button>
       </div>
     </div>
@@ -37,31 +169,41 @@
         class="bg-dark-card rounded-lg shadow-md p-6"
       >
         <div class="flex items-start justify-between mb-4">
-          <div>
+          <div class="flex-1">
             <h3 class="text-lg font-semibold text-dark-text">{{ task.name }}</h3>
             <p class="text-sm text-dark-text-secondary">{{ task.trader }} - Level {{ task.level }}</p>
             <p class="text-dark-text-secondary mt-2">{{ task.description }}</p>
+            <div class="mt-2">
+              <span 
+                v-if="isTaskCompleted(task.id)"
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900/20 text-green-400 border border-green-800"
+              >
+                Completed
+              </span>
+              <span 
+                v-else
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-900/20 text-yellow-400 border border-yellow-800"
+              >
+                In Progress
+              </span>
+            </div>
           </div>
-          <div class="text-right space-y-2">
-            <span 
-              v-if="isTaskCompleted(task.id)"
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900/20 text-green-400 border border-green-800"
-            >
-              Completed
-            </span>
-            <span 
-              v-else
-              class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-900/20 text-yellow-400 border border-yellow-800"
-            >
-              In Progress
-            </span>
+          <div class="ml-4">
             <button
-              v-if="!isTaskCompleted(task.id) && canCompleteTask(task)"
+              v-if="!isTaskCompleted(task.id)"
               @click="completeTask(task)"
-              :disabled="completingTask === task.id"
-              class="block ml-auto px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              :disabled="completingTask === task.id || !canCompleteTask(task)"
+              class="px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {{ completingTask === task.id ? 'Completing...' : 'Complete Task' }}
+              {{ completingTask === task.id ? 'Completing...' : 'Complete' }}
+            </button>
+            <button
+              v-else
+              @click="uncompleteTask(task)"
+              :disabled="uncompletingTask === task.id"
+              class="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {{ uncompletingTask === task.id ? 'Uncompleting...' : 'Uncomplete' }}
             </button>
           </div>
         </div>
@@ -197,12 +339,15 @@
 </template>
 
 <script setup>
+import { doc, getDoc } from 'firebase/firestore'
 import { eftTasks, getTasksByTrader } from '~/data/tasks'
 import { getItemById } from '~/data/items'
 
 const { user, signInWithGoogle } = useAuth()
-const { getUserItemCollection, saveUserTaskObjectives, getUserTaskObjectives, saveCompletedTask, getCompletedTasks, reduceItemsForTask } = useFirestore()
+const { getUserItemCollection, updateUserItemCollection, saveUserTaskObjectives, getUserTaskObjectives, saveCompletedTask, getCompletedTasks, reduceItemsForTask } = useFirestore()
 const { showNonKappaTasks } = useSettings()
+const { getTraders } = useTarkovAPI()
+const { $firebase } = useNuxtApp()
 
 const selectedTrader = ref(null)
 const userItems = ref({})
@@ -210,18 +355,63 @@ const completedObjectives = ref({})
 const hoveredObjective = ref({})
 const completedTasks = ref({})
 const completingTask = ref(null)
+const uncompletingTask = ref(null)
+const selectedFilter = ref('all') // 'all', 'available', 'locked', 'completed'
+const selectedCategory = ref('all') // 'all', 'traders'
+const traderScroll = ref(null)
+const traderData = ref([])
 
 const traders = computed(() => {
+  const traderOrder = ['prapor', 'therapist', 'fence', 'skier', 'peacekeeper', 'mechanic', 'ragman', 'jaeger', 'ref', 'btrdriver', 'lightkeeper']
   const traderList = [...new Set(eftTasks.map(task => task.trader))]
-  return traderList.sort()
+  
+  // Sort traders according to the specified order
+  return traderList.sort((a, b) => {
+    const aIndex = traderOrder.findIndex(t => t.toLowerCase() === a.toLowerCase())
+    const bIndex = traderOrder.findIndex(t => t.toLowerCase() === b.toLowerCase())
+    
+    // If both are in the order array, sort by their position
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex
+    }
+    // If only one is in the order array, it comes first
+    if (aIndex !== -1) return -1
+    if (bIndex !== -1) return 1
+    // If neither is in the order array, sort alphabetically
+    return a.localeCompare(b)
+  })
 })
 
 const filteredTasks = computed(() => {
-  let tasks = selectedTrader.value ? getTasksByTrader(selectedTrader.value) : eftTasks
+  let tasks = eftTasks
+  
+  // Apply category filter
+  if (selectedCategory.value === 'traders' && selectedTrader.value) {
+    tasks = getTasksByTrader(selectedTrader.value)
+  }
   
   // Apply non-Kappa filter if setting is disabled
   if (!showNonKappaTasks.value) {
     tasks = tasks.filter(task => task.kappaRequired === true)
+  }
+  
+  // Apply status filter
+  if (selectedFilter.value !== 'all') {
+    tasks = tasks.filter(task => {
+      const completed = isTaskCompleted(task.id)
+      const available = isTaskAvailable(task)
+      
+      switch (selectedFilter.value) {
+        case 'completed':
+          return completed
+        case 'available':
+          return !completed && available
+        case 'locked':
+          return !completed && !available
+        default:
+          return true
+      }
+    })
   }
   
   return tasks
@@ -321,28 +511,50 @@ const isTaskCompleted = (taskId) => {
   return completedTasks.value[taskId] === true
 }
 
+const isTaskAvailable = (task) => {
+  // If task has no prerequisites, it's available
+  if (!task.prerequisites || task.prerequisites.length === 0) {
+    return true
+  }
+  
+  // Check if all prerequisite tasks are completed
+  return task.prerequisites.every(prereqId => isTaskCompleted(prereqId))
+}
+
 const canCompleteTask = (task) => {
   // Check if already completed
   if (isTaskCompleted(task.id)) return false
   
-  // Check if all objectives are completed
-  if (task.objectives && task.objectives.length > 0) {
-    const allObjectivesCompleted = task.objectives.every((_, index) => 
-      isObjectiveCompleted(task.id, index)
-    )
-    if (!allObjectivesCompleted) return false
-  }
-  
-  // Check if user has all required items
-  if (task.requirements && task.requirements.length > 0) {
-    const hasAllItems = task.requirements.every(req => {
-      const userCount = getUserItemCount(req.itemId, req.foundInRaid)
-      return userCount >= req.quantity
-    })
-    if (!hasAllItems) return false
-  }
-  
   return true
+}
+
+const getTraderImage = (traderName) => {
+  const trader = traderData.value.find(t => 
+    t.name.toLowerCase() === traderName.toLowerCase() ||
+    t.normalizedName === traderName.toLowerCase()
+  )
+  return trader?.imageLink || trader?.image4xLink
+}
+
+const loadTraderData = async () => {
+  try {
+    const traders = await getTraders()
+    traderData.value = traders
+  } catch (error) {
+    console.error('Failed to load trader data:', error)
+  }
+}
+
+const scrollTraders = (direction) => {
+  const container = traderScroll.value
+  if (!container) return
+  
+  const scrollAmount = 200
+  if (direction === 'left') {
+    container.scrollLeft -= scrollAmount
+  } else {
+    container.scrollLeft += scrollAmount
+  }
 }
 
 const completeTask = async (task) => {
@@ -351,12 +563,42 @@ const completeTask = async (task) => {
   completingTask.value = task.id
   
   try {
-    // First, reduce the items from inventory
-    if (task.requirements && task.requirements.length > 0) {
-      await reduceItemsForTask(user.value.uid, task.requirements)
+    // First, mark all objectives as completed
+    if (task.objectives && task.objectives.length > 0) {
+      for (let i = 0; i < task.objectives.length; i++) {
+        const key = `${task.id}_${i}`
+        completedObjectives.value[key] = true
+        await saveUserTaskObjectives(user.value.uid, key, true)
+      }
     }
     
-    // Then mark the task as completed
+    // Add required items to user's collection
+    if (task.requirements && task.requirements.length > 0) {
+      for (const requirement of task.requirements) {
+        const itemRef = doc($firebase.db, 'userItems', `${user.value.uid}_${requirement.itemId}`)
+        const itemDoc = await getDoc(itemRef)
+        
+        let currentQuantity = 0
+        let currentFIR = 0
+        
+        if (itemDoc.exists()) {
+          const data = itemDoc.data()
+          currentQuantity = data.quantity || 0
+          currentFIR = data.foundInRaid || 0
+        }
+        
+        // Add the required quantity to the user's collection
+        const newQuantity = currentQuantity + requirement.quantity
+        const newFIR = requirement.foundInRaid ? currentFIR + requirement.quantity : currentFIR
+        
+        await updateUserItemCollection(user.value.uid, requirement.itemId, {
+          quantity: newQuantity,
+          foundInRaid: newFIR
+        })
+      }
+    }
+    
+    // Finally mark the task as completed
     await saveCompletedTask(user.value.uid, task.id, true)
     completedTasks.value[task.id] = true
     
@@ -366,9 +608,81 @@ const completeTask = async (task) => {
     console.error('Failed to complete task:', error)
     // Reload data in case of partial completion
     await loadUserItems()
+    await loadUserTaskObjectives()
     await loadCompletedTasks()
   } finally {
     completingTask.value = null
+  }
+}
+
+const uncompleteTask = async (task) => {
+  if (!user.value || !isTaskCompleted(task.id)) return
+  
+  uncompletingTask.value = task.id
+  
+  try {
+    // First, remove the items that were added when completing the task
+    if (task.requirements && task.requirements.length > 0) {
+      for (const requirement of task.requirements) {
+        const itemRef = doc($firebase.db, 'userItems', `${user.value.uid}_${requirement.itemId}`)
+        const itemDoc = await getDoc(itemRef)
+        
+        if (itemDoc.exists()) {
+          const data = itemDoc.data()
+          let currentQuantity = data.quantity || 0
+          let currentFIR = data.foundInRaid || 0
+          
+          // Subtract the required quantity from the user's collection
+          const newQuantity = Math.max(0, currentQuantity - requirement.quantity)
+          let newFIR = currentFIR
+          
+          if (requirement.foundInRaid) {
+            // Remove from FIR count
+            newFIR = Math.max(0, currentFIR - requirement.quantity)
+          } else {
+            // Remove from regular items first, then FIR if needed
+            const regularItems = currentQuantity - currentFIR
+            if (regularItems >= requirement.quantity) {
+              // Can remove all from regular items
+              newFIR = currentFIR
+            } else {
+              // Need to remove some from FIR items
+              const fromFIR = requirement.quantity - regularItems
+              newFIR = Math.max(0, currentFIR - fromFIR)
+            }
+          }
+          
+          await updateUserItemCollection(user.value.uid, requirement.itemId, {
+            quantity: newQuantity,
+            foundInRaid: newFIR
+          })
+        }
+      }
+    }
+    
+    // Clear all objectives
+    if (task.objectives && task.objectives.length > 0) {
+      for (let i = 0; i < task.objectives.length; i++) {
+        const key = `${task.id}_${i}`
+        completedObjectives.value[key] = false
+        await saveUserTaskObjectives(user.value.uid, key, false)
+      }
+    }
+    
+    // Mark the task as not completed
+    await saveCompletedTask(user.value.uid, task.id, false)
+    completedTasks.value[task.id] = false
+    
+    // Reload user items to reflect the changes
+    await loadUserItems()
+  } catch (error) {
+    console.error('Failed to uncomplete task:', error)
+    // Reload data in case of partial completion
+    await loadUserItems()
+    await loadUserTaskObjectives()
+    await loadCompletedTasks()
+  } finally {
+    uncompletingTask.value = null
   }
 }
 
@@ -384,7 +698,22 @@ watch(user, (newUser) => {
   }
 }, { immediate: true })
 
+// Load trader data on mount
+onMounted(() => {
+  loadTraderData()
+})
+
 useHead({
   title: 'Tasks - EFT Tracker'
 })
 </script>
+
+<style scoped>
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+</style>
