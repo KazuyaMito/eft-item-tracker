@@ -92,6 +92,16 @@ export const useTarkovAPI = () => {
               foundInRaid
             }
           }
+          failConditions {
+            __typename
+            ... on TaskObjectiveTaskStatus {
+              task {
+                id
+                name
+              }
+              status
+            }
+          }
           finishRewards {
             traderStanding {
               trader {

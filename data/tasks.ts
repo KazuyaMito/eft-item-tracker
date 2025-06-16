@@ -14,6 +14,8 @@ export interface EFTTask {
   objectives?: string[]
   taskRequirements?: any[]
   traderLevelRequirements?: any[]
+  prerequisites?: string[]
+  parallelTaskIds?: string[]
 }
 
 let cachedTasks: any[] = []
@@ -46,7 +48,16 @@ const fetchTasks = async () => {
           foundInRaid: obj.foundInRaid || false
         })) || []
 
-      return {
+      // Extract parallel task IDs from failConditions
+      const parallelTaskIds = task.failConditions
+        ?.filter((condition: any) => 
+          condition.__typename === 'TaskObjectiveTaskStatus' && 
+          condition.status?.includes('complete')
+        )
+        .map((condition: any) => condition.task?.id)
+        .filter(Boolean) || []
+
+      const baseTask = {
         id: task.id,
         name: task.name,
         trader: task.trader?.name || 'Unknown',
@@ -64,8 +75,12 @@ const fetchTasks = async () => {
         normalizedName: task.normalizedName,
         wikiLink: task.wikiLink,
         taskRequirements: task.taskRequirements || [],
-        traderLevelRequirements: task.traderLevelRequirements || []
+        traderLevelRequirements: task.traderLevelRequirements || [],
+        prerequisites: task.taskRequirements?.map((req: any) => req.task?.id).filter(Boolean) || [],
+        parallelTaskIds // Add parallel tasks from API
       }
+      
+      return baseTask
     })
     
     lastFetchTime = now

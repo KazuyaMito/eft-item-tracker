@@ -142,6 +142,22 @@
         <div class="flex-1"></div>
         
         <button
+          @click="showTasksAboveLevel = !showTasksAboveLevel"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            showTasksAboveLevel
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
+          ]"
+          :title="showTasksAboveLevel ? 'Hide tasks above your level' : 'Show tasks above your level'"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+          </svg>
+          {{ showTasksAboveLevel ? 'HIDE' : 'SHOW' }} LVL {{ playerLevel }}+
+        </button>
+        
+        <button
           @click="selectedFilter = 'all'"
           :class="[
             'px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
@@ -170,15 +186,41 @@
       >
         <div class="flex items-start justify-between mb-4">
           <div class="flex-1">
-            <h3 class="text-lg font-semibold text-dark-text">{{ task.name }}</h3>
-            <p class="text-sm text-dark-text-secondary">{{ task.trader }} - Level {{ task.level }}</p>
+            <div class="flex items-start gap-2">
+              <h3 class="text-lg font-semibold text-dark-text">{{ task.name }}</h3>
+              <div v-if="task.parallelTaskIds && task.parallelTaskIds.length > 0" class="flex items-center gap-1">
+                <div class="group relative">
+                  <svg class="w-5 h-5 text-blue-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                  </svg>
+                  <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-dark-surface border border-dark-border rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    <p class="text-sm text-dark-text">Alternative tasks available</p>
+                    <div class="text-xs text-dark-text-secondary mt-1">
+                      Complete one, others will fail
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="text-sm text-dark-text-secondary">
+              {{ task.trader }} - 
+              <span :class="task.level > playerLevel ? 'text-red-500 font-semibold' : ''">
+                Level {{ task.level }}
+              </span>
+            </p>
             <p class="text-dark-text-secondary mt-2">{{ task.description }}</p>
-            <div class="mt-2">
+            <div class="mt-2 flex items-center gap-2">
               <span 
-                v-if="isTaskCompleted(task.id)"
+                v-if="taskCompletionStatuses[task.id]?.status === 'completed'"
                 class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900/20 text-green-400 border border-green-800"
               >
                 Completed
+              </span>
+              <span 
+                v-else-if="taskCompletionStatuses[task.id]?.status === 'failed'"
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-900/20 text-red-400 border border-red-800"
+              >
+                Failed (Alternative Completed)
               </span>
               <span 
                 v-else
@@ -186,6 +228,21 @@
               >
                 In Progress
               </span>
+              
+              <!-- Show related parallel tasks -->
+              <div v-if="task.parallelTaskIds && task.parallelTaskIds.length > 0 && taskCompletionStatuses[task.id]?.status !== 'completed'" class="flex items-center gap-1 text-xs text-dark-text-secondary">
+                <span>Alternatives:</span>
+                <span v-for="(parallelId, idx) in task.parallelTaskIds" :key="parallelId" class="flex items-center">
+                  <span v-if="idx > 0" class="mx-1">|</span>
+                  <span 
+                    :class="{
+                      'text-green-400': taskCompletionStatuses[parallelId]?.status === 'completed',
+                      'text-red-400': taskCompletionStatuses[parallelId]?.status === 'failed'
+                    }">
+                    {{ getTaskName(parallelId) }}
+                  </span>
+                </span>
+              </div>
             </div>
           </div>
           <div class="ml-4">
@@ -347,7 +404,9 @@ const { user, signInWithGoogle } = useAuth()
 const { getUserItemCollection, updateUserItemCollection, saveUserTaskObjectives, getUserTaskObjectives, saveCompletedTask, getCompletedTasks, reduceItemsForTask } = useFirestore()
 const { showNonKappaTasks } = useSettings()
 const { getTraders } = useTarkovAPI()
+const { playerLevel } = usePlayerLevel()
 const { $firebase } = useNuxtApp()
+const { taskCompletionStatuses, completeTask: completeTaskWithParallel, uncompleteTask: uncompleteTaskWithParallel, getTaskStatusInfo } = useTaskCompletion()
 
 const selectedTrader = ref(null)
 const userItems = ref({})
@@ -360,6 +419,7 @@ const selectedFilter = ref('all') // 'all', 'available', 'locked', 'completed'
 const selectedCategory = ref('all') // 'all', 'traders'
 const traderScroll = ref(null)
 const traderData = ref([])
+const showTasksAboveLevel = ref(false)
 
 const traders = computed(() => {
   const traderOrder = ['prapor', 'therapist', 'fence', 'skier', 'peacekeeper', 'mechanic', 'ragman', 'jaeger', 'ref', 'btrdriver', 'lightkeeper']
@@ -395,6 +455,25 @@ const filteredTasks = computed(() => {
     tasks = tasks.filter(task => task.kappaRequired === true)
   }
   
+  // Filter by player level if showTasksAboveLevel is false
+  if (!showTasksAboveLevel.value) {
+    tasks = tasks.filter(task => {
+      return task.level <= playerLevel.value
+    })
+  }
+  
+  // Filter out tasks with incomplete prerequisites
+  tasks = tasks.filter(task => {
+    // If task has prerequisites, check if they are all completed
+    if (task.prerequisites && task.prerequisites.length > 0) {
+      const allPrerequisitesCompleted = task.prerequisites.every(prereqId => isTaskCompleted(prereqId))
+      if (!allPrerequisitesCompleted) {
+        return false
+      }
+    }
+    return true
+  })
+  
   // Apply status filter
   if (selectedFilter.value !== 'all') {
     tasks = tasks.filter(task => {
@@ -420,6 +499,11 @@ const filteredTasks = computed(() => {
 const getItemName = (itemId) => {
   const item = getItemById(itemId)
   return item ? item.name : itemId
+}
+
+const getTaskName = (taskId) => {
+  const task = eftTasks.find(t => t.id === taskId)
+  return task ? task.name : taskId
 }
 
 const getUserItemCount = (itemId, foundInRaid) => {
@@ -508,7 +592,7 @@ const toggleObjective = async (taskId, objectiveIndex) => {
 }
 
 const isTaskCompleted = (taskId) => {
-  return completedTasks.value[taskId] === true
+  return taskCompletionStatuses.value[taskId]?.status === 'completed'
 }
 
 const isTaskAvailable = (task) => {
@@ -522,8 +606,9 @@ const isTaskAvailable = (task) => {
 }
 
 const canCompleteTask = (task) => {
-  // Check if already completed
-  if (isTaskCompleted(task.id)) return false
+  // Check if already completed or failed
+  const status = taskCompletionStatuses.value[task.id]?.status
+  if (status === 'completed' || status === 'failed') return false
   
   return true
 }
@@ -598,7 +683,10 @@ const completeTask = async (task) => {
       }
     }
     
-    // Finally mark the task as completed
+    // Use the new composable to complete task (handles parallel tasks)
+    await completeTaskWithParallel(task)
+    
+    // Also save to legacy system for backward compatibility
     await saveCompletedTask(user.value.uid, task.id, true)
     completedTasks.value[task.id] = true
     
@@ -669,7 +757,10 @@ const uncompleteTask = async (task) => {
       }
     }
     
-    // Mark the task as not completed
+    // Use the new composable to uncomplete task
+    await uncompleteTaskWithParallel(task.id)
+    
+    // Also save to legacy system for backward compatibility
     await saveCompletedTask(user.value.uid, task.id, false)
     completedTasks.value[task.id] = false
     
