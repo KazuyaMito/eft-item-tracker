@@ -19,17 +19,6 @@
       <!-- Filter Buttons -->
       <div v-if="user" class="flex flex-wrap gap-2 mb-4">
         <button
-          @click="setFilter('all')"
-          :class="[
-            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
-            currentFilter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-dark-surface text-dark-text hover:bg-blue-600 hover:text-white'
-          ]"
-        >
-          All ({{ getTotalFilteredLevels('all') }})
-        </button>
-        <button
           @click="setFilter('available')"
           :class="[
             'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
@@ -50,6 +39,17 @@
           ]"
         >
           Locked ({{ getTotalFilteredLevels('locked') }})
+        </button>
+        <button
+          @click="setFilter('all')"
+          :class="[
+            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            currentFilter === 'all'
+              ? 'bg-blue-600 text-white'
+              : 'bg-dark-surface text-dark-text hover:bg-blue-600 hover:text-white'
+          ]"
+        >
+          All ({{ getTotalFilteredLevels('all') }})
         </button>
       </div>
     </div>
