@@ -8,7 +8,8 @@
       
       <div class="mb-6">
         <input
-          v-model="searchQuery"
+          :value="searchQuery"
+          @input="handleSearchInput"
           type="text"
           placeholder="Search items..."
           class="w-full px-4 py-2 bg-dark-surface border border-dark-surface rounded-lg text-dark-text placeholder-dark-text-secondary focus:ring-2 focus:ring-blue-400 focus:border-transparent"
@@ -152,11 +153,27 @@ const { updateUserItemCollection, getUserItemCollection } = useFirestore()
 const { showNonKappaTasks } = useSettings()
 
 const searchQuery = ref('')
+const debouncedSearchQuery = ref('')
 const itemQuantities = ref({})
 const pendingUpdates = ref({})
 
+// Debounce search input - reduced delay for better responsiveness
+let searchTimeout = null
+const handleSearchInput = (event) => {
+  const value = event.target.value
+  searchQuery.value = value
+  
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  searchTimeout = setTimeout(() => {
+    debouncedSearchQuery.value = value
+  }, 300) // Reduced from 500ms to 300ms
+}
 
-const itemRequirements = computed(() => {
+
+// Cached base requirements - only recompute when source data changes
+const baseItemRequirements = computed(() => {
   const requirements = []
   
   // Filter tasks based on kappa setting
@@ -193,30 +210,21 @@ const itemRequirements = computed(() => {
     })
   })
   
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    return requirements.filter(req => {
-      const item = getItemById(req.itemId)
-      return item && (
-        item.name.toLowerCase().includes(query) ||
-        req.sourceName.toLowerCase().includes(query)
-      )
-    })
-  }
-  
   return requirements
 })
 
-const groupedItemRequirements = computed(() => {
+// Grouped requirements without search filter - cache this expensive operation
+const baseGroupedItemRequirements = computed(() => {
   const grouped = {}
   
-  itemRequirements.value.forEach(req => {
+  baseItemRequirements.value.forEach(req => {
     if (!grouped[req.itemId]) {
       grouped[req.itemId] = {
         itemId: req.itemId,
         sources: [],
-        totalQuantity: 0
+        totalQuantity: 0,
+        // Cache item data to avoid repeated lookups
+        itemData: getItemById(req.itemId)
       }
     }
     
@@ -232,18 +240,57 @@ const groupedItemRequirements = computed(() => {
   })
   
   return Object.values(grouped).sort((a, b) => {
-    const itemA = getItemById(a.itemId)
-    const itemB = getItemById(b.itemId)
-    return (itemA?.name || a.itemId).localeCompare(itemB?.name || b.itemId)
+    const nameA = a.itemData?.name || a.itemId
+    const nameB = b.itemData?.name || b.itemId
+    return nameA.localeCompare(nameB)
   })
 })
 
+// Apply search filter only to the final grouped results
+const groupedItemRequirements = computed(() => {
+  if (!debouncedSearchQuery.value) {
+    return baseGroupedItemRequirements.value
+  }
+  
+  const query = debouncedSearchQuery.value.toLowerCase()
+  return baseGroupedItemRequirements.value.filter(groupedItem => {
+    // Use cached item data instead of calling getItemById again
+    const itemName = groupedItem.itemData?.name || groupedItem.itemId
+    
+    // Check if item name matches
+    if (itemName.toLowerCase().includes(query)) {
+      return true
+    }
+    
+    // Check if any source name matches
+    return groupedItem.sources.some(source => 
+      source.sourceName.toLowerCase().includes(query)
+    )
+  })
+})
+
+// Use cached item data from grouped requirements when possible
 const getItemName = (itemId) => {
+  // First check if we have cached data in grouped requirements
+  const cachedItem = baseGroupedItemRequirements.value.find(g => g.itemId === itemId)
+  if (cachedItem?.itemData) {
+    return cachedItem.itemData.name
+  }
+  
+  // Fallback to direct lookup
   const item = getItemById(itemId)
   return item ? item.name : itemId
 }
 
+// Use cached item data from grouped requirements when possible
 const getItemIconLink = (itemId) => {
+  // First check if we have cached data in grouped requirements
+  const cachedItem = baseGroupedItemRequirements.value.find(g => g.itemId === itemId)
+  if (cachedItem?.itemData) {
+    return cachedItem.itemData.iconLink
+  }
+  
+  // Fallback to direct lookup
   const item = getItemById(itemId)
   return item ? item.iconLink : null
 }
