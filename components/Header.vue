@@ -3,7 +3,11 @@
     <div class="container mx-auto px-4 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <h1 class="text-2xl font-bold text-eft-primary">EFT Tracker</h1>
+          <NuxtLink to="/" class="group">
+            <h1 class="text-2xl font-bold text-eft-primary group-hover:text-eft-secondary transition-colors cursor-pointer">
+              EFT Item Tracker
+            </h1>
+          </NuxtLink>
           <nav class="hidden md:flex space-x-6">
             <NuxtLink to="/" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
               Dashboard
