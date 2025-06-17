@@ -21,14 +21,27 @@ export function useItemQuantity(options: UseItemQuantityOptions = {}) {
     return itemQuantities.value[itemId]?.foundInRaid || 0
   }
 
-  const updateQuantity = (itemId: string, value: string | number) => {
-    const numValue = Math.max(0, parseInt(value.toString()) || 0)
+  const updateQuantity = (itemId: string, value: string | number, maxValue?: number) => {
+    let numValue = Math.max(0, parseInt(value.toString()) || 0)
+    
+    // Apply maximum value constraint if provided
+    if (maxValue !== undefined) {
+      numValue = Math.min(numValue, maxValue)
+    }
+    
     pendingUpdates.value[itemId] = numValue
   }
 
-  const incrementQuantity = async (itemId: string) => {
+  const incrementQuantity = async (itemId: string, maxValue?: number) => {
     const current = getCurrentQuantity(itemId)
-    pendingUpdates.value[itemId] = current + 1
+    let newValue = current + 1
+    
+    // Apply maximum value constraint if provided
+    if (maxValue !== undefined) {
+      newValue = Math.min(newValue, maxValue)
+    }
+    
+    pendingUpdates.value[itemId] = newValue
     await saveQuantity(itemId)
   }
 

@@ -141,16 +141,18 @@
               
               <input
                 :value="getCurrentQuantity(groupedItem.itemId)"
-                @input="updateQuantity(groupedItem.itemId, $event.target.value)"
+                @input="updateQuantity(groupedItem.itemId, $event.target.value, groupedItem.totalQuantity)"
                 @blur="saveQuantity(groupedItem.itemId)"
                 type="number"
                 min="0"
-                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-surface text-dark-text text-sm"
+                :max="groupedItem.totalQuantity"
+                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-surface text-dark-text text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               >
               
               <button
-                @click="incrementQuantity(groupedItem.itemId)"
-                class="w-8 h-8 rounded-full bg-dark-surface hover:bg-dark-hover flex items-center justify-center transition-colors"
+                @click="incrementQuantity(groupedItem.itemId, groupedItem.totalQuantity)"
+                :disabled="getCurrentQuantity(groupedItem.itemId) >= groupedItem.totalQuantity"
+                class="w-8 h-8 rounded-full bg-dark-surface hover:bg-dark-hover flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
@@ -283,16 +285,18 @@
               
               <input
                 :value="getCurrentQuantity(groupedItem.itemId)"
-                @input="updateQuantity(groupedItem.itemId, $event.target.value)"
+                @input="updateQuantity(groupedItem.itemId, $event.target.value, groupedItem.totalQuantity)"
                 @blur="saveQuantity(groupedItem.itemId)"
                 type="number"
                 min="0"
-                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-card text-dark-text text-sm"
+                :max="groupedItem.totalQuantity"
+                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-card text-dark-text text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               >
               
               <button
-                @click="incrementQuantity(groupedItem.itemId)"
-                class="w-8 h-8 rounded-full bg-dark-card hover:bg-dark-hover flex items-center justify-center transition-colors"
+                @click="incrementQuantity(groupedItem.itemId, groupedItem.totalQuantity)"
+                :disabled="getCurrentQuantity(groupedItem.itemId) >= groupedItem.totalQuantity"
+                class="w-8 h-8 rounded-full bg-dark-card hover:bg-dark-hover flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
