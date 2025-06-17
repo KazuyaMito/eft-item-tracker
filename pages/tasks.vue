@@ -95,31 +95,32 @@
       </div>
       
       <!-- Status filters -->
-      <div class="flex gap-2 mb-4">
+      <div class="flex flex-wrap gap-2 mb-4">
         <button
           @click="selectedFilter = 'available'"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            'flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors',
             selectedFilter === 'available'
               ? 'text-white ring-2 ring-blue-500'
               : 'text-dark-text-secondary hover:text-white'
           ]"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          AVAILABLE
+          <span class="hidden sm:inline">AVAILABLE</span>
+          <span class="sm:hidden">AVAIL</span>
         </button>
         <button
           @click="selectedFilter = 'locked'"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            'flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors',
             selectedFilter === 'locked'
               ? 'text-white ring-2 ring-blue-500'
               : 'text-dark-text-secondary hover:text-white'
           ]"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
           LOCKED
@@ -127,46 +128,47 @@
         <button
           @click="selectedFilter = 'completed'"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            'flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors',
             selectedFilter === 'completed'
               ? 'text-white ring-2 ring-blue-500'
               : 'text-dark-text-secondary hover:text-white'
           ]"
         >
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3 h-3 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
           </svg>
-          COMPLETED
+          <span class="hidden sm:inline">COMPLETED</span>
+          <span class="sm:hidden">DONE</span>
         </button>
-        
-        <div class="flex-1"></div>
-        
-        <button
-          @click="showTasksAboveLevel = !showTasksAboveLevel"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
-            showTasksAboveLevel
-              ? 'text-white ring-2 ring-blue-500'
-              : 'text-dark-text-secondary hover:text-white'
-          ]"
-          :title="showTasksAboveLevel ? 'Hide tasks above your level' : 'Show tasks above your level'"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-          </svg>
-          {{ showTasksAboveLevel ? 'HIDE' : 'SHOW' }} LVL {{ playerLevel }}+
-        </button>
-        
         <button
           @click="selectedFilter = 'all'"
           :class="[
-            'px-4 py-2 rounded bg-dark-surface text-sm font-medium transition-colors',
+            'px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors',
             selectedFilter === 'all'
               ? 'text-white ring-2 ring-blue-500'
               : 'text-dark-text-secondary hover:text-white'
           ]"
         >
           ALL
+        </button>
+        
+        <div class="w-full md:w-auto md:flex-1"></div>
+        
+        <button
+          @click="showTasksAboveLevel = !showTasksAboveLevel"
+          :class="[
+            'flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors whitespace-nowrap',
+            showTasksAboveLevel
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
+          ]"
+          :title="showTasksAboveLevel ? 'Hide tasks above your level' : 'Show tasks above your level'"
+        >
+          <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+          </svg>
+          <span class="hidden md:inline">{{ showTasksAboveLevel ? 'HIDE' : 'SHOW' }} LVL {{ playerLevel }}+</span>
+          <span class="md:hidden">L{{ playerLevel }}+</span>
         </button>
       </div>
     </div>
