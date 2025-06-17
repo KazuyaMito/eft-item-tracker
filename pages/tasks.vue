@@ -193,9 +193,13 @@
       <div
         v-for="task in filteredTasks"
         :key="task.id"
-        class="bg-dark-card rounded-lg shadow-md p-6"
+        :class="[
+          'bg-dark-card rounded-lg shadow-md',
+          isMobile ? 'p-4' : 'p-6'
+        ]"
       >
-        <div class="flex items-start justify-between mb-4">
+        <!-- PC Layout -->
+        <div v-if="!isMobile" class="flex items-start justify-between mb-4">
           <div class="flex-1">
             <div class="flex items-start gap-2">
               <h3 class="text-lg font-semibold text-dark-text">{{ task.name }}</h3>
@@ -275,6 +279,83 @@
             </button>
           </div>
         </div>
+
+        <!-- Mobile Layout -->
+        <div v-else class="mb-4">
+          <div>
+            <div class="flex items-start gap-2 mb-2">
+              <h3 class="text-base font-semibold text-dark-text">{{ task.name }}</h3>
+              <div v-if="task.parallelTaskIds && task.parallelTaskIds.length > 0" class="flex items-center gap-1">
+                <div class="group relative">
+                  <svg class="w-4 h-4 text-blue-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-dark-text-secondary mb-2">
+              {{ task.trader }} - 
+              <span :class="task.level > playerLevel ? 'text-red-500 font-semibold' : ''">
+                Level {{ task.level }}
+              </span>
+            </p>
+            <p class="text-sm text-dark-text-secondary mb-3">{{ task.description }}</p>
+            
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span 
+                v-if="taskCompletionStatuses[task.id]?.status === 'completed'"
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900/20 text-green-400 border border-green-800"
+              >
+                Completed
+              </span>
+              <span 
+                v-else-if="taskCompletionStatuses[task.id]?.status === 'failed'"
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-900/20 text-red-400 border border-red-800"
+              >
+                Failed
+              </span>
+              <span 
+                v-else
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-900/20 text-yellow-400 border border-yellow-800"
+              >
+                In Progress
+              </span>
+              
+              <!-- Show action button inline on mobile -->
+              <button
+                v-if="!isTaskCompleted(task.id)"
+                @click="completeTask(task)"
+                :disabled="completingTask === task.id || !canCompleteTask(task)"
+                class="ml-auto px-3 py-1 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {{ completingTask === task.id ? 'Completing...' : 'Complete' }}
+              </button>
+              <button
+                v-else
+                @click="uncompleteTask(task)"
+                :disabled="uncompletingTask === task.id"
+                class="ml-auto px-3 py-1 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {{ uncompletingTask === task.id ? 'Uncompleting...' : 'Uncomplete' }}
+              </button>
+            </div>
+            
+            <!-- Show related parallel tasks -->
+            <div v-if="task.parallelTaskIds && task.parallelTaskIds.length > 0 && taskCompletionStatuses[task.id]?.status !== 'completed'" class="text-xs text-dark-text-secondary">
+              <span>Alternatives: </span>
+              <span v-for="(parallelId, idx) in task.parallelTaskIds" :key="parallelId" class="inline">
+                <span v-if="idx > 0"> | </span>
+                <span 
+                  :class="{
+                    'text-green-400': taskCompletionStatuses[parallelId]?.status === 'completed',
+                    'text-red-400': taskCompletionStatuses[parallelId]?.status === 'failed'
+                  }">
+                  {{ getTaskName(parallelId) }}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
         
         <div v-if="task.objectives && task.objectives.length > 0" class="space-y-3">
           <h4 class="font-medium text-dark-text">Objectives:</h4>
@@ -350,15 +431,21 @@
         </div>
         
         <div v-if="task.requirements && task.requirements.length > 0" class="space-y-3">
-          <h4 class="font-medium text-dark-text">Item Requirements:</h4>
+          <h4 class="font-medium text-dark-text" :class="isMobile ? 'text-sm' : ''">Item Requirements:</h4>
           <div class="space-y-2">
             <div
               v-for="requirement in task.requirements"
               :key="requirement.id"
-              class="flex items-center justify-between p-3 bg-dark-surface rounded-lg"
+              :class="[
+                'flex items-center justify-between bg-dark-surface rounded-lg',
+                isMobile ? 'p-2' : 'p-3'
+              ]"
             >
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-dark-surface rounded flex items-center justify-center overflow-hidden">
+              <div class="flex items-center" :class="isMobile ? 'space-x-2' : 'space-x-3'">
+                <div :class="[
+                  'bg-dark-surface rounded flex items-center justify-center overflow-hidden',
+                  isMobile ? 'w-8 h-8' : 'w-10 h-10'
+                ]">
                   <img 
                     v-if="requirement.itemIconLink"
                     :src="requirement.itemIconLink"
@@ -369,20 +456,30 @@
                   <span v-else class="text-xs text-dark-text-secondary">IMG</span>
                 </div>
                 <div>
-                  <p class="font-medium text-dark-text">
+                  <p :class="[
+                    'font-medium text-dark-text',
+                    isMobile ? 'text-sm' : ''
+                  ]">
                     {{ requirement.itemName || getItemName(requirement.itemId) }}
                   </p>
-                  <p class="text-sm text-dark-text-secondary">
+                  <p :class="[
+                    'text-dark-text-secondary',
+                    isMobile ? 'text-xs' : 'text-sm'
+                  ]">
                     {{ requirement.foundInRaid ? 'Found in Raid' : 'Any condition' }}
                   </p>
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-lg font-semibold" :class="getProgressClass(requirement)">
+                <div :class="[
+                  'font-semibold',
+                  isMobile ? 'text-base' : 'text-lg',
+                  getProgressClass(requirement)
+                ]">
                   {{ getUserItemCount(requirement.itemId, requirement.foundInRaid) }} / {{ requirement.quantity }}
                 </div>
                 <div class="text-xs text-dark-text-secondary">
-                  {{ getProgressPercentage(requirement) }}% Complete
+                  {{ getProgressPercentage(requirement) }}%
                 </div>
               </div>
             </div>
@@ -390,12 +487,21 @@
         </div>
         
         <div class="mt-4 pt-4 border-t border-dark-border">
-          <h4 class="font-medium text-dark-text mb-2">Rewards:</h4>
-          <div class="flex flex-wrap gap-2">
+          <h4 :class="[
+            'font-medium text-dark-text mb-2',
+            isMobile ? 'text-sm' : ''
+          ]">Rewards:</h4>
+          <div :class="[
+            'flex flex-wrap',
+            isMobile ? 'gap-1' : 'gap-2'
+          ]">
             <span
               v-for="reward in task.rewards"
               :key="reward"
-              class="inline-block px-2 py-1 text-xs bg-green-900/20 text-green-400 border border-green-800 rounded"
+              :class="[
+                'inline-block bg-green-900/20 text-green-400 border border-green-800 rounded',
+                isMobile ? 'px-2 py-0.5 text-xs' : 'px-2 py-1 text-xs'
+              ]"
             >
               {{ reward }}
             </span>
@@ -418,6 +524,7 @@ const { getTraders } = useTarkovAPI()
 const { playerLevel } = usePlayerLevel()
 const { $firebase } = useNuxtApp()
 const { taskCompletionStatuses, completeTask: completeTaskWithParallel, uncompleteTask: uncompleteTaskWithParallel, getTaskStatusInfo } = useTaskCompletion()
+const { isMobile } = useBreakpoint()
 
 const selectedTrader = ref(null)
 const userItems = ref({})

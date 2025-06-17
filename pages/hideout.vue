@@ -65,9 +65,13 @@
       <template v-for="station in hideoutStations" :key="station.id">
         <div
           v-if="getFilteredLevels(station).length > 0"
-          class="bg-dark-card rounded-lg shadow-md p-6"
+          :class="[
+            'bg-dark-card rounded-lg shadow-md',
+            isMobile ? 'p-4' : 'p-6'
+          ]"
         >
-        <div class="mb-4">
+        <!-- PC Layout -->
+        <div v-if="!isMobile" class="mb-4">
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-lg font-semibold text-dark-text">{{ station.name }}</h3>
@@ -101,34 +105,92 @@
             </div>
           </div>
         </div>
+
+        <!-- Mobile Layout -->
+        <div v-else class="mb-4">
+          <div class="space-y-3">
+            <div>
+              <h3 class="text-base font-semibold text-dark-text">{{ station.name }}</h3>
+              <p class="text-xs text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
+            </div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium" :class="getStationProgressClass(station)">
+                  {{ getStationCompletedLevels(station) }} / {{ station.levels.length }}
+                </div>
+                <div class="text-xs text-dark-text-secondary">
+                  {{ getStationProgressPercentage(station) }}% Complete
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="canUpgradeStation(station)"
+                  @click="upgradeStation(station.id, getStationCurrentLevel(station.id) + 1)"
+                  class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-colors"
+                >
+                  Upgrade L{{ getStationCurrentLevel(station.id) + 1 }}
+                </button>
+                <button
+                  v-if="getStationCurrentLevel(station.id) > 0"
+                  @click="downgradeStation(station.id, getStationCurrentLevel(station.id) - 1)"
+                  class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors"
+                >
+                  Down
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <div class="space-y-4">
           <div
             v-for="level in getFilteredLevels(station)"
             :key="level.level"
             :class="[
-              'border rounded-lg p-4',
+              'border rounded-lg',
+              isMobile ? 'p-3' : 'p-4',
               getFilteredLevelClasses(station.id, level)
             ]"
           >
-            <div class="flex items-center justify-between mb-3">
+            <div :class="[
+              'flex items-center justify-between',
+              isMobile ? 'mb-2' : 'mb-3'
+            ]">
               <div>
-                <h4 class="font-medium text-dark-text">Level {{ level.level }}</h4>
-                <span class="text-sm text-dark-text-secondary">
+                <h4 :class="[
+                  'font-medium text-dark-text',
+                  isMobile ? 'text-sm' : ''
+                ]">Level {{ level.level }}</h4>
+                <span :class="[
+                  'text-dark-text-secondary',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">
                   Construction Time: {{ level.constructionTime }}
                 </span>
               </div>
               <div class="text-right">
-                <div v-if="getStationCurrentLevel(station.id) === level.level" class="text-green-400 text-sm font-medium">
+                <div v-if="getStationCurrentLevel(station.id) === level.level" :class="[
+                  'text-green-400 font-medium',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">
                   Current Level
                 </div>
-                <div v-else-if="getStationCurrentLevel(station.id) > level.level" class="text-green-400 text-sm">
+                <div v-else-if="getStationCurrentLevel(station.id) > level.level" :class="[
+                  'text-green-400',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">
                   Completed
                 </div>
-                <div v-else-if="getStationCurrentLevel(station.id) === level.level - 1 && isLevelBuildable(station.id, level)" class="text-blue-400 text-sm">
+                <div v-else-if="getStationCurrentLevel(station.id) === level.level - 1 && isLevelBuildable(station.id, level)" :class="[
+                  'text-blue-400',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">
                   Ready to build
                 </div>
-                <div v-else-if="!isLevelBuildable(station.id, level)" class="text-red-400 text-sm">
+                <div v-else-if="!isLevelBuildable(station.id, level)" :class="[
+                  'text-red-400',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">
                   Prerequisites not met
                 </div>
               </div>
@@ -137,7 +199,10 @@
             <div class="space-y-3">
               <!-- Station Prerequisites -->
               <div v-if="level.stationLevelRequirements && level.stationLevelRequirements.length > 0">
-                <h5 class="text-sm font-medium text-dark-text mb-2">Station Prerequisites:</h5>
+                <h5 :class="[
+                  'font-medium text-dark-text mb-2',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">Station Prerequisites:</h5>
                 <div class="space-y-2">
                   <div
                     v-for="requirement in level.stationLevelRequirements"
@@ -160,15 +225,24 @@
               
               <!-- Item Requirements -->
               <div>
-                <h5 class="text-sm font-medium text-dark-text mb-2">Item Requirements:</h5>
+                <h5 :class="[
+                  'font-medium text-dark-text mb-2',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">Item Requirements:</h5>
                 <div class="space-y-2">
                   <div
                     v-for="requirement in level.requirements"
                     :key="requirement.id"
-                    class="flex items-center justify-between p-3 bg-dark-surface rounded-lg"
+                    :class="[
+                      'flex items-center justify-between bg-dark-surface rounded-lg',
+                      isMobile ? 'p-2' : 'p-3'
+                    ]"
                   >
-                    <div class="flex items-center space-x-3">
-                      <div class="w-10 h-10 bg-dark-surface rounded flex items-center justify-center overflow-hidden">
+                    <div class="flex items-center" :class="isMobile ? 'space-x-2' : 'space-x-3'">
+                      <div :class="[
+                        'bg-dark-surface rounded flex items-center justify-center overflow-hidden',
+                        isMobile ? 'w-8 h-8' : 'w-10 h-10'
+                      ]">
                         <img 
                           v-if="requirement.itemIconLink"
                           :src="requirement.itemIconLink"
@@ -179,20 +253,30 @@
                         <span v-else class="text-xs text-dark-text-secondary">IMG</span>
                       </div>
                       <div>
-                        <p class="font-medium text-dark-text">
+                        <p :class="[
+                          'font-medium text-dark-text',
+                          isMobile ? 'text-sm' : ''
+                        ]">
                           {{ requirement.itemName || getItemName(requirement.itemId) }}
                         </p>
-                        <p class="text-sm text-dark-text-secondary">
+                        <p :class="[
+                          'text-dark-text-secondary',
+                          isMobile ? 'text-xs' : 'text-sm'
+                        ]">
                           Found in Raid required
                         </p>
                       </div>
                     </div>
                     <div class="text-right">
-                      <div class="text-lg font-semibold" :class="getProgressClass(requirement)">
+                      <div :class="[
+                        'font-semibold',
+                        isMobile ? 'text-base' : 'text-lg',
+                        getProgressClass(requirement)
+                      ]">
                         {{ getUserItemCount(requirement.itemId, true) }} / {{ requirement.quantity }}
                       </div>
                       <div class="text-xs text-dark-text-secondary">
-                        {{ getProgressPercentage(requirement) }}% Complete
+                        {{ getProgressPercentage(requirement) }}%
                       </div>
                     </div>
                   </div>
@@ -201,7 +285,10 @@
               
               <!-- Skill Requirements -->
               <div v-if="level.skillRequirements && level.skillRequirements.length > 0">
-                <h5 class="text-sm font-medium text-dark-text mb-2">Skill Requirements:</h5>
+                <h5 :class="[
+                  'font-medium text-dark-text mb-2',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">Skill Requirements:</h5>
                 <div class="flex flex-wrap gap-2">
                   <span
                     v-for="requirement in level.skillRequirements"
@@ -215,7 +302,10 @@
               
               <!-- Trader Requirements -->
               <div v-if="level.traderRequirements && level.traderRequirements.length > 0">
-                <h5 class="text-sm font-medium text-dark-text mb-2">Trader Requirements:</h5>
+                <h5 :class="[
+                  'font-medium text-dark-text mb-2',
+                  isMobile ? 'text-xs' : 'text-sm'
+                ]">Trader Requirements:</h5>
                 <div class="flex flex-wrap gap-2">
                   <span
                     v-for="requirement in level.traderRequirements"
@@ -241,6 +331,7 @@ import { getItemById } from '~/data/items'
 
 const { user, signInWithGoogle } = useAuth()
 const { getUserItemCollection, saveUserHideoutProgress, getUserHideoutProgress } = useFirestore()
+const { isMobile } = useBreakpoint()
 
 const userItems = ref({})
 const hideoutProgress = ref({})
