@@ -72,4 +72,30 @@
   .border-dark-surface {
     border-color: var(--dark-surface);
   }
+
+  /* Mobile-specific text hiding */
+  @media (max-width: 640px) {
+    .mobile-hide-text {
+      font-size: 0;
+    }
+    .mobile-hide-text svg {
+      font-size: 1rem;
+    }
+    
+    .mobile-short-text .mobile-long {
+      display: none;
+    }
+    .mobile-short-text .mobile-short {
+      display: inline;
+    }
+  }
+
+  @media (min-width: 641px) {
+    .mobile-short-text .mobile-long {
+      display: inline;
+    }
+    .mobile-short-text .mobile-short {
+      display: none;
+    }
+  }
 }
