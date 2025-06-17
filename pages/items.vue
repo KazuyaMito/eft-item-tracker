@@ -151,15 +151,19 @@ import { useDebounce } from '~/composables/useDebounce'
 import { hideoutStations } from '~/data/hideout'
 
 const { user, signInWithGoogle } = useAuth()
-const { updateUserItemCollection, getUserItemCollection } = useFirestore()
+const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress } = useFirestore()
 const { showNonKappaTasks } = useSettings()
+
+// Hideout progress for filtering requirements
+const hideoutProgress = ref({})
 
 const searchQuery = ref('')
 const { debouncedValue: debouncedSearchQuery, setValue: setDebouncedSearch } = useDebounce('', 300)
 
 // Initialize item requirements composable
 const { baseGroupedItemRequirements } = useItemRequirements({
-  showNonKappaTasks
+  showNonKappaTasks,
+  hideoutProgress
 })
 
 // Initialize item quantity composable
@@ -254,12 +258,42 @@ const loadUserItems = async () => {
   }
 }
 
+// Load hideout progress from Firestore
+const loadHideoutProgress = async () => {
+  if (!user.value) return
+  
+  try {
+    const progress = await getUserHideoutProgress(user.value.uid)
+    
+    // Convert old boolean format to new level format
+    const levels = {}
+    Object.keys(progress || {}).forEach(key => {
+      if (key.includes('_')) {
+        // Old format: stationId_level -> boolean
+        const [stationId, level] = key.split('_')
+        if (progress[key] === true) {
+          levels[stationId] = Math.max(levels[stationId] || 0, parseInt(level))
+        }
+      } else {
+        // New format: stationId -> currentLevel
+        levels[key] = progress[key]
+      }
+    })
+    
+    hideoutProgress.value = levels
+  } catch (error) {
+    console.error('Failed to load hideout progress:', error)
+  }
+}
+
 // Watch for user changes
 watch(user, (newUser) => {
   if (newUser) {
     loadUserItems()
+    loadHideoutProgress()
   } else {
     clearQuantities()
+    hideoutProgress.value = {}
   }
 }, { immediate: true })
 
