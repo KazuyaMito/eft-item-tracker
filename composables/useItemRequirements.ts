@@ -16,6 +16,7 @@ export interface ItemRequirementSource {
 export interface UseItemRequirementsOptions {
   showNonKappaTasks: ComputedRef<boolean> | boolean
   hideoutProgress?: ComputedRef<Record<string, number>> | Record<string, number>
+  completedTasks?: ComputedRef<Record<string, boolean>> | Record<string, boolean>
 }
 
 export function useItemRequirements(options: UseItemRequirementsOptions) {
@@ -36,6 +37,16 @@ export function useItemRequirements(options: UseItemRequirementsOptions) {
     return typeof progress === 'object' && progress !== null ? progress : {}
   })
 
+  const completedTasks = computed(() => {
+    const tasks = options.completedTasks
+      ? (typeof options.completedTasks === 'object' && 'value' in options.completedTasks
+          ? options.completedTasks.value
+          : options.completedTasks)
+      : {}
+    
+    return typeof tasks === 'object' && tasks !== null ? tasks : {}
+  })
+
   // Extract all item requirements from tasks and hideout
   const baseItemRequirements = computed<ItemRequirementSource[]>(() => {
     const requirements: ItemRequirementSource[] = []
@@ -45,8 +56,11 @@ export function useItemRequirements(options: UseItemRequirementsOptions) {
       ? eftTasks 
       : eftTasks.filter(task => task.kappaRequired === true)
     
-    // Add task requirements
+    // Add task requirements (exclude completed tasks)
     filteredTasks.forEach(task => {
+      // Skip completed tasks
+      if (completedTasks.value[task.id]) return
+      
       task.requirements.forEach(req => {
         requirements.push({
           itemId: req.itemId,
