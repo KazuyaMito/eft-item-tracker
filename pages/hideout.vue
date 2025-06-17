@@ -85,9 +85,23 @@
         <!-- PC Layout -->
         <div v-if="!isMobile" class="mb-4">
           <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-lg font-semibold text-dark-text">{{ station.name }}</h3>
-              <p class="text-sm text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img 
+                  v-if="station.imageLink"
+                  :src="station.imageLink"
+                  :alt="station.name"
+                  class="w-full h-full object-cover"
+                  @error="$event.target.style.display='none'"
+                />
+                <svg v-else class="w-6 h-6 text-dark-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-dark-text">{{ station.name }}</h3>
+                <p class="text-sm text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
+              </div>
             </div>
             <div class="flex items-center space-x-4">
               <div class="text-right">
@@ -121,9 +135,23 @@
         <!-- Mobile Layout -->
         <div v-else class="mb-4">
           <div class="space-y-3">
-            <div>
-              <h3 class="text-base font-semibold text-dark-text">{{ station.name }}</h3>
-              <p class="text-xs text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img 
+                  v-if="station.imageLink"
+                  :src="station.imageLink"
+                  :alt="station.name"
+                  class="w-full h-full object-cover"
+                  @error="$event.target.style.display='none'"
+                />
+                <svg v-else class="w-4 h-4 text-dark-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-base font-semibold text-dark-text">{{ station.name }}</h3>
+                <p class="text-xs text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
+              </div>
             </div>
             <div class="flex items-center justify-between">
               <div>
