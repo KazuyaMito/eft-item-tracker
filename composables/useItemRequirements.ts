@@ -15,6 +15,7 @@ export interface ItemRequirementSource {
 
 export interface UseItemRequirementsOptions {
   showNonKappaTasks: ComputedRef<boolean> | boolean
+  hideoutProgress?: ComputedRef<Record<string, number>> | Record<string, number>
 }
 
 export function useItemRequirements(options: UseItemRequirementsOptions) {
@@ -23,6 +24,17 @@ export function useItemRequirements(options: UseItemRequirementsOptions) {
       ? options.showNonKappaTasks 
       : options.showNonKappaTasks.value
   )
+
+  const hideoutProgress = computed(() => {
+    const progress = options.hideoutProgress 
+      ? (typeof options.hideoutProgress === 'object' && 'value' in options.hideoutProgress 
+          ? options.hideoutProgress.value 
+          : options.hideoutProgress)
+      : {}
+    
+    // Ensure we have a proper object (not a number)
+    return typeof progress === 'object' && progress !== null ? progress : {}
+  })
 
   // Extract all item requirements from tasks and hideout
   const baseItemRequirements = computed<ItemRequirementSource[]>(() => {
@@ -47,18 +59,22 @@ export function useItemRequirements(options: UseItemRequirementsOptions) {
       })
     })
     
-    // Add hideout requirements
+    // Add hideout requirements (excluding completed levels)
     hideoutStations.forEach(station => {
+      const currentLevel = hideoutProgress.value[station.id] || 0
       station.levels.forEach(level => {
-        level.requirements.forEach(req => {
-          requirements.push({
-            itemId: req.itemId,
-            quantity: req.quantity,
-            source: 'hideout',
-            sourceId: `${station.id}_${level.level}`,
-            sourceName: `${station.name} Level ${level.level}`
+        // Only include requirements for levels that are not yet completed
+        if (level.level > currentLevel) {
+          level.requirements.forEach(req => {
+            requirements.push({
+              itemId: req.itemId,
+              quantity: req.quantity,
+              source: 'hideout',
+              sourceId: `${station.id}_${level.level}`,
+              sourceName: `${station.name} Level ${level.level}`
+            })
           })
-        })
+        }
       })
     })
     
