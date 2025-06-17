@@ -21,35 +21,47 @@
         <button
           @click="setFilter('available')"
           :class="[
-            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            'flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors',
             currentFilter === 'available'
-              ? 'bg-green-600 text-white'
-              : 'bg-dark-surface text-dark-text hover:bg-green-600 hover:text-white'
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
           ]"
         >
-          Available ({{ getTotalFilteredLevels('available') }})
+          <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="mobile-short-text">
+            <span class="mobile-long">AVAILABLE ({{ getTotalFilteredLevels('available') }})</span>
+            <span class="mobile-short">AVAIL</span>
+          </span>
         </button>
         <button
           @click="setFilter('locked')"
           :class="[
-            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            'flex items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors',
             currentFilter === 'locked'
-              ? 'bg-red-600 text-white'
-              : 'bg-dark-surface text-dark-text hover:bg-red-600 hover:text-white'
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
           ]"
         >
-          Locked ({{ getTotalFilteredLevels('locked') }})
+          <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span class="mobile-short-text">
+            <span class="mobile-long">LOCKED ({{ getTotalFilteredLevels('locked') }})</span>
+            <span class="mobile-short">LOCK</span>
+          </span>
         </button>
         <button
           @click="setFilter('all')"
           :class="[
-            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            'px-2 md:px-4 py-2 rounded bg-dark-surface text-xs md:text-sm font-medium transition-colors',
             currentFilter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-dark-surface text-dark-text hover:bg-blue-600 hover:text-white'
+              ? 'text-white ring-2 ring-blue-500'
+              : 'text-dark-text-secondary hover:text-white'
           ]"
         >
-          All ({{ getTotalFilteredLevels('all') }})
+          ALL ({{ getTotalFilteredLevels('all') }})
         </button>
       </div>
     </div>
