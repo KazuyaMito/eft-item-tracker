@@ -31,9 +31,9 @@
         :key="groupedItem.itemId"
         class="bg-dark-card rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
       >
-        <div class="flex items-center justify-between mobile-responsive-item">
-          <div class="flex items-center space-x-4 flex-1 item-info">
-            <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div class="flex items-center space-x-3 md:space-x-4 flex-1 min-w-0">
+            <div class="w-12 h-12 md:w-16 md:h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
               <img 
                 v-if="groupedItem.itemIconLink"
                 :src="groupedItem.itemIconLink"
@@ -45,7 +45,7 @@
             </div>
             
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-dark-text truncate">{{ groupedItem.itemName }}</h3>
+              <h3 class="font-semibold text-dark-text truncate text-sm md:text-base">{{ groupedItem.itemName }}</h3>
               <div class="space-y-1">
                 <div
                   v-for="source in groupedItem.sources"
@@ -55,7 +55,7 @@
                   <div class="flex items-center space-x-2">
                     <div
                       v-if="source.source === 'task'"
-                      class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+                      class="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
                       :title="source.traderName"
                     >
                       <img
@@ -72,7 +72,7 @@
                     </div>
                     <div
                       v-else-if="source.source === 'hideout'"
-                      class="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 overflow-hidden"
+                      class="w-4 h-4 md:w-5 md:h-5 rounded flex items-center justify-center flex-shrink-0 overflow-hidden"
                       :title="getHideoutStationName(source.sourceId)"
                     >
                       <img
@@ -91,7 +91,7 @@
                     </div>
                     <p
                       :class="[
-                        'text-sm truncate px-2 py-1 text-xs rounded',
+                        'text-xs md:text-sm truncate px-1 md:px-2 py-1 rounded',
                         source.source === 'task' 
                           ? 'bg-blue-900 text-blue-200' 
                           : 'bg-green-900 text-green-200'
@@ -104,8 +104,9 @@
               </div>
             </div>
             
-            <div class="flex items-center space-x-2 item-controls">
-              <span class="text-sm text-dark-text-secondary mr-2">Found in Raid:</span>
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2">
+            <span class="text-xs md:text-sm text-dark-text-secondary whitespace-nowrap">Found in Raid:</span>
+            <div class="flex items-center justify-center sm:justify-start space-x-2">
               <button
                 @click="decrementQuantity(groupedItem.itemId)"
                 class="w-8 h-8 rounded-full bg-dark-surface hover:bg-dark-hover flex items-center justify-center transition-colors"
@@ -122,7 +123,7 @@
                 @blur="saveQuantity(groupedItem.itemId)"
                 type="number"
                 min="0"
-                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-surface text-dark-text"
+                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-surface text-dark-text text-sm"
               >
               
               <button
@@ -134,8 +135,9 @@
                 </svg>
               </button>
               
-              <span class="text-sm text-dark-text-secondary ml-2">/ {{ groupedItem.totalQuantity }}</span>
+              <span class="text-xs md:text-sm text-dark-text-secondary whitespace-nowrap">/ {{ groupedItem.totalQuantity }}</span>
             </div>
+          </div>
           </div>
         </div>
       </div>
