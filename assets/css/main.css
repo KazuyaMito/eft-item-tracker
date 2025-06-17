@@ -73,15 +73,9 @@
     border-color: var(--dark-surface);
   }
 
-  /* Mobile-specific text hiding */
+
+  /* Mobile-specific text utilities */
   @media (max-width: 640px) {
-    .mobile-hide-text {
-      font-size: 0;
-    }
-    .mobile-hide-text svg {
-      font-size: 1rem;
-    }
-    
     .mobile-short-text .mobile-long {
       display: none;
     }
