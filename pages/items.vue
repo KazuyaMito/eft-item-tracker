@@ -106,7 +106,7 @@
             
           <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2">
             <span class="text-xs md:text-sm text-dark-text-secondary whitespace-nowrap">Found in Raid:</span>
-            <div class="flex items-center justify-center sm:justify-start space-x-2">
+            <div class="flex items-center justify-center md:justify-start space-x-2">
               <button
                 @click="decrementQuantity(groupedItem.itemId)"
                 class="w-8 h-8 rounded-full bg-dark-surface hover:bg-dark-hover flex items-center justify-center transition-colors"

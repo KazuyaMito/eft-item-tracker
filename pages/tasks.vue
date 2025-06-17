@@ -78,8 +78,10 @@
                   />
                   <span v-else class="text-[8px] md:text-[10px] font-bold">{{ trader.substring(0, 2).toUpperCase() }}</span>
                 </div>
-                <span class="uppercase hidden sm:inline">{{ trader }}</span>
-                <span class="uppercase sm:hidden text-[10px]">{{ trader.substring(0, 3).toUpperCase() }}</span>
+                <span class="uppercase mobile-short-text">
+                  <span class="mobile-long">{{ trader }}</span>
+                  <span class="mobile-short">{{ trader.substring(0, 3).toUpperCase() }}</span>
+                </span>
               </button>
             </div>
             
@@ -109,8 +111,10 @@
           <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span class="hidden sm:inline">AVAILABLE</span>
-          <span class="sm:hidden">AVAIL</span>
+          <span class="mobile-short-text">
+            <span class="mobile-long">AVAILABLE</span>
+            <span class="mobile-short">AVAIL</span>
+          </span>
         </button>
         <button
           @click="selectedFilter = 'locked'"
@@ -138,8 +142,10 @@
           <svg class="w-3 h-3 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
           </svg>
-          <span class="hidden sm:inline">COMPLETED</span>
-          <span class="sm:hidden">DONE</span>
+          <span class="mobile-short-text">
+            <span class="mobile-long">COMPLETED</span>
+            <span class="mobile-short">DONE</span>
+          </span>
         </button>
         <button
           @click="selectedFilter = 'all'"
@@ -168,8 +174,10 @@
           <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
           </svg>
-          <span class="hidden md:inline">{{ showTasksAboveLevel ? 'HIDE' : 'SHOW' }} LVL {{ playerLevel }}+</span>
-          <span class="md:hidden">L{{ playerLevel }}+</span>
+          <span class="mobile-short-text">
+            <span class="mobile-long">{{ showTasksAboveLevel ? 'HIDE' : 'SHOW' }} LVL {{ playerLevel }}+</span>
+            <span class="mobile-short">L{{ playerLevel }}+</span>
+          </span>
         </button>
       </div>
     </div>
