@@ -269,7 +269,8 @@ import { useDebounce } from '~/composables/useDebounce'
 import { hideoutStations } from '~/data/hideout'
 
 const { user, signInWithGoogle } = useAuth()
-const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress, getUserTaskCompletion } = useFirestore()
+const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress } = useFirestore()
+const { getUserTaskStatuses } = useTaskCompletion()
 const { showNonKappaTasks } = useSettings()
 const { isMobile } = useBreakpoint()
 
@@ -412,8 +413,13 @@ const loadCompletedTasks = async () => {
   if (!user.value) return
   
   try {
-    const tasks = await getUserTaskCompletion(user.value.uid)
-    completedTasks.value = tasks || {}
+    const taskStatuses = await getUserTaskStatuses()
+    // Convert task statuses to simple completed boolean map
+    const tasks = {}
+    Object.entries(taskStatuses).forEach(([taskId, status]) => {
+      tasks[taskId] = status.status === 'completed'
+    })
+    completedTasks.value = tasks
   } catch (error) {
     console.error('Failed to load completed tasks:', error)
   }
