@@ -26,7 +26,7 @@
         
         <div class="flex items-center space-x-4">
           <div class="flex items-center space-x-2 bg-dark-surface rounded-lg px-3 py-2">
-            <span class="text-sm text-dark-text-secondary">Level</span>
+            <span class="text-sm text-dark-text-secondary hidden sm:inline">Level</span>
             <img 
               :src="getLevelBadgeUrl(playerLevel)" 
               :alt="`Level ${playerLevel}`"
@@ -64,12 +64,15 @@
           <div v-if="!loading">
             <div v-if="user" class="flex items-center space-x-4">
               <img :src="user.photoURL" :alt="user.displayName" class="w-8 h-8 rounded-full">
-              <span class="text-sm text-dark-text">{{ user.displayName }}</span>
+              <span class="text-sm text-dark-text hidden sm:inline">{{ user.displayName }}</span>
               <button 
                 @click="logout" 
                 class="btn btn-secondary text-sm"
               >
-                Logout
+                <span class="hidden sm:inline">Logout</span>
+                <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
               </button>
             </div>
             <button 
@@ -77,7 +80,8 @@
               @click="signInWithGoogle" 
               class="btn btn-primary"
             >
-              Sign in with Google
+              <span class="hidden sm:inline">Sign in with Google</span>
+              <span class="sm:hidden">Sign in</span>
             </button>
           </div>
           <div v-else class="text-sm text-dark-text-secondary">Loading...</div>

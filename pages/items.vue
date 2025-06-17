@@ -31,8 +31,8 @@
         :key="groupedItem.itemId"
         class="bg-dark-card rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
       >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4 flex-1">
+        <div class="flex items-center justify-between mobile-responsive-item">
+          <div class="flex items-center space-x-4 flex-1 item-info">
             <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
               <img 
                 v-if="groupedItem.itemIconLink"
@@ -104,7 +104,7 @@
               </div>
             </div>
             
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 item-controls">
               <span class="text-sm text-dark-text-secondary mr-2">Found in Raid:</span>
               <button
                 @click="decrementQuantity(groupedItem.itemId)"
