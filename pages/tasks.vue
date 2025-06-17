@@ -7,19 +7,19 @@
       </p>
       
       <!-- Category filters and trader selection -->
-      <div class="flex gap-2 mb-4">
+      <div class="flex flex-col md:flex-row gap-2 mb-4">
         <!-- ALL/TRADERS buttons section -->
-        <div class="bg-dark-surface rounded-lg p-2 flex gap-2 flex-shrink-0">
+        <div class="bg-dark-surface rounded-lg p-2 flex gap-2 justify-center md:justify-start">
           <button
             @click="selectedCategory = 'all'; selectedTrader = null"
             :class="[
-              'flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
+              'flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded text-xs md:text-sm font-medium transition-colors',
               selectedCategory === 'all'
                 ? 'bg-dark-hover text-white'
                 : 'text-dark-text-secondary hover:text-white'
             ]"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
             </svg>
             ALL
@@ -27,14 +27,14 @@
           <button
             @click="selectedCategory = 'traders'"
             :class="[
-              'flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-colors',
+              'flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded text-xs md:text-sm font-medium transition-colors',
               selectedCategory === 'traders'
                 ? 'bg-dark-hover text-white'
                 : 'text-dark-text-secondary hover:text-white'
             ]"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 715.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             TRADERS
           </button>
@@ -43,7 +43,7 @@
         <!-- Trader selection area (separate background) -->
         <div class="flex-1 bg-dark-hover rounded-lg p-2 min-w-0 flex items-center justify-center">
           <div v-if="selectedCategory === 'all'" class="text-center">
-            <p class="text-sm text-dark-text-secondary uppercase tracking-wider">Showing All Sources</p>
+            <p class="text-xs md:text-sm text-dark-text-secondary uppercase tracking-wider">Showing All Sources</p>
           </div>
           
           <div v-else-if="selectedCategory === 'traders'" class="w-full flex items-center gap-1 min-w-0">
@@ -51,24 +51,24 @@
               class="text-dark-text-secondary hover:text-white p-1 flex-shrink-0 transition-colors"
               @click="scrollTraders('left')"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
-            <div ref="traderScroll" class="flex gap-2 flex-nowrap overflow-x-hidden scrollbar-hide flex-1 scroll-smooth min-w-0">
+            <div ref="traderScroll" class="flex gap-1 md:gap-2 flex-nowrap overflow-x-hidden scrollbar-hide flex-1 scroll-smooth min-w-0">
               <button
                 v-for="trader in traders"
                 :key="trader"
                 @click="selectedTrader = selectedTrader === trader ? null : trader"
                 :class="[
-                  'flex items-center gap-2 px-3 py-1 rounded text-xs font-medium transition-colors flex-shrink-0',
+                  'flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 rounded text-xs font-medium transition-colors flex-shrink-0',
                   selectedTrader === trader
                     ? 'bg-blue-600 text-white'
                     : 'bg-dark-surface text-dark-text-secondary hover:bg-dark-surface'
                 ]"
               >
-                <div class="w-6 h-6 bg-dark-card rounded-full flex items-center justify-center overflow-hidden">
+                <div class="w-5 h-5 md:w-6 md:h-6 bg-dark-card rounded-full flex items-center justify-center overflow-hidden">
                   <img 
                     v-if="getTraderImage(trader)"
                     :src="getTraderImage(trader)"
@@ -76,9 +76,10 @@
                     class="w-full h-full object-cover"
                     @error="$event.target.style.display='none'"
                   />
-                  <span v-else class="text-[10px] font-bold">{{ trader.substring(0, 2).toUpperCase() }}</span>
+                  <span v-else class="text-[8px] md:text-[10px] font-bold">{{ trader.substring(0, 2).toUpperCase() }}</span>
                 </div>
-                <span class="uppercase">{{ trader }}</span>
+                <span class="uppercase hidden sm:inline">{{ trader }}</span>
+                <span class="uppercase sm:hidden text-[10px]">{{ trader.substring(0, 3).toUpperCase() }}</span>
               </button>
             </div>
             
@@ -86,7 +87,7 @@
               class="text-dark-text-secondary hover:text-white p-1 flex-shrink-0 transition-colors"
               @click="scrollTraders('right')"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
               </svg>
             </button>
