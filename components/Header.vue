@@ -24,21 +24,21 @@
           </nav>
         </div>
         
-        <div class="flex items-center space-x-4">
-          <div class="flex items-center space-x-2 bg-dark-surface rounded-lg px-3 py-2">
+        <div class="flex items-center space-x-2 md:space-x-4">
+          <div class="flex items-center space-x-1 md:space-x-2 bg-dark-surface rounded-lg px-2 md:px-3 py-1 md:py-2">
             <span class="text-sm text-dark-text-secondary hidden sm:inline">Level</span>
             <img 
               :src="getLevelBadgeUrl(playerLevel)" 
               :alt="`Level ${playerLevel}`"
-              class="w-8 h-8"
+              class="w-6 h-6 md:w-8 md:h-8"
               @error="handleBadgeError"
             >
             <button 
               @click="decrementLevel" 
               :disabled="playerLevel <= 1"
-              class="text-dark-text-secondary hover:text-eft-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="p-1 text-dark-text-secondary hover:text-eft-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
               </svg>
             </button>
@@ -48,26 +48,26 @@
               @input="handleLevelInput"
               min="1"
               max="79"
-              class="w-12 text-center bg-transparent text-dark-text font-semibold border-b border-dark-border focus:border-eft-primary outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              class="w-8 md:w-12 text-center bg-transparent text-dark-text font-semibold border-b border-dark-border focus:border-eft-primary outline-none text-sm [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             >
             <button 
               @click="incrementLevel" 
               :disabled="playerLevel >= 79"
-              class="text-dark-text-secondary hover:text-eft-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="p-1 text-dark-text-secondary hover:text-eft-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
             </button>
           </div>
           
           <div v-if="!loading">
-            <div v-if="user" class="flex items-center space-x-4">
-              <img :src="user.photoURL" :alt="user.displayName" class="w-8 h-8 rounded-full">
+            <div v-if="user" class="flex items-center space-x-2 md:space-x-4">
+              <img :src="user.photoURL" :alt="user.displayName" class="w-6 h-6 md:w-8 md:h-8 rounded-full">
               <span class="text-sm text-dark-text hidden sm:inline">{{ user.displayName }}</span>
               <button 
                 @click="logout" 
-                class="btn btn-secondary text-sm"
+                class="btn btn-secondary text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
               >
                 <span class="hidden sm:inline">Logout</span>
                 <svg class="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@
             <button 
               v-else 
               @click="signInWithGoogle" 
-              class="btn btn-primary"
+              class="btn btn-primary text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
             >
               <span class="hidden sm:inline">Sign in with Google</span>
               <span class="sm:hidden">Sign in</span>
