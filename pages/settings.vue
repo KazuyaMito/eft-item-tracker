@@ -4,6 +4,34 @@
       <h1 class="text-3xl font-bold text-dark-text mb-6">Settings</h1>
       
       <div class="space-y-6">
+        <!-- Game Edition Section -->
+        <div class="border-b border-dark-surface pb-6">
+          <h2 class="text-xl font-semibold text-dark-text mb-4">Game Edition</h2>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="text-dark-text font-medium">Escape from Tarkov Edition</label>
+              <p class="text-sm text-dark-text-secondary mt-1">
+                Your game edition affects hideout stash starting level
+              </p>
+            </div>
+            
+            <div class="w-64">
+              <select 
+                :value="gameEdition"
+                @change="handleGameEditionChange"
+                class="w-full px-4 py-2 bg-dark-surface border border-dark-border rounded-lg text-dark-text focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="Standard Edition">Standard Edition</option>
+                <option value="Left Behind Edition">Left Behind Edition</option>
+                <option value="Prepare for Escape Edition">Prepare for Escape Edition</option>
+                <option value="Edge of Darkness Edition">Edge of Darkness Edition</option>
+                <option value="The Unheard Edition">The Unheard Edition</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <!-- Quest Filters Section -->
         <div class="border-b border-dark-surface pb-6">
           <h2 class="text-xl font-semibold text-dark-text mb-4">Quest Filters</h2>
@@ -51,9 +79,13 @@
 </template>
 
 <script setup>
-const { showNonKappaTasks, saveShowNonKappaTasks } = useSettings()
+const { showNonKappaTasks, gameEdition, saveShowNonKappaTasks, saveGameEdition } = useSettings()
 
 const toggleShowNonKappaTasks = () => {
   saveShowNonKappaTasks(!showNonKappaTasks.value)
+}
+
+const handleGameEditionChange = (event) => {
+  saveGameEdition(event.target.value)
 }
 </script>

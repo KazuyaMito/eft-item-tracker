@@ -3,6 +3,7 @@ export const useSettings = () => {
   const { saveUserSettings, getUserSettings, watchUserSettings } = useFirestore()
   
   const showNonKappaTasks = ref(true)
+  const gameEdition = ref('Standard Edition')
   let unsubscribe: (() => void) | null = null
 
   // Load settings from Firebase
@@ -13,6 +14,9 @@ export const useSettings = () => {
       const settings = await getUserSettings(user.value.uid)
       if (settings.showNonKappaTasks !== undefined) {
         showNonKappaTasks.value = settings.showNonKappaTasks
+      }
+      if (settings.gameEdition !== undefined) {
+        gameEdition.value = settings.gameEdition
       }
     } catch (error) {
       console.error('Failed to load user settings:', error)
@@ -34,6 +38,20 @@ export const useSettings = () => {
     }
   }
 
+  const saveGameEdition = async (value: string) => {
+    gameEdition.value = value
+    
+    if (!user.value) return
+    
+    try {
+      await saveUserSettings(user.value.uid, {
+        gameEdition: value
+      })
+    } catch (error) {
+      console.error('Failed to save user settings:', error)
+    }
+  }
+
   // Watch for settings changes
   const startWatchingSettings = () => {
     if (!user.value || unsubscribe) return
@@ -41,6 +59,9 @@ export const useSettings = () => {
     unsubscribe = watchUserSettings(user.value.uid, (settings) => {
       if (settings.showNonKappaTasks !== undefined) {
         showNonKappaTasks.value = settings.showNonKappaTasks
+      }
+      if (settings.gameEdition !== undefined) {
+        gameEdition.value = settings.gameEdition
       }
     })
   }
@@ -62,6 +83,7 @@ export const useSettings = () => {
       startWatchingSettings()
     } else {
       showNonKappaTasks.value = true
+      gameEdition.value = 'Standard Edition'
     }
   }, { immediate: true })
 
@@ -72,6 +94,8 @@ export const useSettings = () => {
 
   return {
     showNonKappaTasks: readonly(showNonKappaTasks),
-    saveShowNonKappaTasks
+    gameEdition: readonly(gameEdition),
+    saveShowNonKappaTasks,
+    saveGameEdition
   }
 }

@@ -371,6 +371,7 @@ import { getItemById } from '~/data/items'
 
 const { user, signInWithGoogle } = useAuth()
 const { getUserItemCollection, saveUserHideoutProgress, getUserHideoutProgress } = useFirestore()
+const { gameEdition } = useSettings()
 const { isMobile } = useBreakpoint()
 
 const userItems = ref({})
@@ -411,8 +412,23 @@ const getProgressPercentage = (requirement) => {
   return Math.min(Math.round((current / needed) * 100), 100)
 }
 
+const getStationStartingLevel = (stationId) => {
+  // Stash starting level based on game edition
+  if (stationId === 'stash') {
+    if (gameEdition.value === 'Edge of Darkness Edition' || gameEdition.value === 'The Unheard Edition') {
+      return 4
+    }
+  }
+  return 0
+}
+
 const getStationCurrentLevel = (stationId) => {
-  return stationLevels.value[stationId] || 0
+  const currentLevel = stationLevels.value[stationId]
+  if (currentLevel !== undefined) {
+    return currentLevel
+  }
+  // Return starting level based on game edition if not set
+  return getStationStartingLevel(stationId)
 }
 
 const isLevelComplete = (stationId, level) => {
@@ -669,6 +685,16 @@ const loadHideoutProgress = async () => {
       }
     })
     
+    // Set starting levels based on game edition
+    if (levels.stash === undefined) {
+      const startingLevel = getStationStartingLevel('stash')
+      if (startingLevel > 0) {
+        levels.stash = startingLevel
+        // Save the starting level to Firestore
+        await saveUserHideoutProgress(user.value.uid, 'stash', startingLevel)
+      }
+    }
+    
     stationLevels.value = levels
   } catch (error) {
     console.error('Failed to load hideout progress:', error)
@@ -685,6 +711,24 @@ watch(user, (newUser) => {
     stationLevels.value = {}
   }
 }, { immediate: true })
+
+// Watch for game edition changes and update stash level if needed
+watch(gameEdition, async (newEdition) => {
+  if (!user.value) return
+  
+  const newStartingLevel = getStationStartingLevel('stash')
+  const currentStashLevel = stationLevels.value.stash || 0
+  
+  // Only update if the new starting level is higher than current level
+  if (newStartingLevel > currentStashLevel) {
+    stationLevels.value.stash = newStartingLevel
+    try {
+      await saveUserHideoutProgress(user.value.uid, 'stash', newStartingLevel)
+    } catch (error) {
+      console.error('Failed to update stash level:', error)
+    }
+  }
+})
 
 useHead({
   title: 'Hideout - EFT Tracker'
