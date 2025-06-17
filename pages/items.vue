@@ -29,7 +29,12 @@
       <div
         v-for="groupedItem in groupedItemRequirements"
         :key="groupedItem.itemId"
-        class="bg-dark-card rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
+        :class="[
+          'rounded-lg shadow-md p-4 hover:shadow-lg transition-all duration-300',
+          isItemCompleted(groupedItem.itemId, groupedItem.totalQuantity)
+            ? 'bg-green-900/20 border-2 border-green-600/50 shadow-green-600/20'
+            : 'bg-dark-card'
+        ]"
       >
         <!-- PC Layout -->
         <div v-if="!isMobile" class="flex items-center justify-between">
@@ -46,7 +51,24 @@
             </div>
             
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-dark-text truncate">{{ groupedItem.itemName }}</h3>
+              <h3 
+                :class="[
+                  'font-semibold truncate flex items-center gap-2',
+                  isItemCompleted(groupedItem.itemId, groupedItem.totalQuantity)
+                    ? 'text-green-400'
+                    : 'text-dark-text'
+                ]"
+              >
+                {{ groupedItem.itemName }}
+                <svg 
+                  v-if="isItemCompleted(groupedItem.itemId, groupedItem.totalQuantity)"
+                  class="w-4 h-4 text-green-400 flex-shrink-0" 
+                  fill="currentColor" 
+                  viewBox="0 0 20 20"
+                >
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </h3>
               <div class="space-y-1">
                 <div
                   v-for="source in groupedItem.sources"
@@ -135,7 +157,16 @@
                 </svg>
               </button>
               
-              <span class="text-sm text-dark-text-secondary ml-2">/ {{ groupedItem.totalQuantity }}</span>
+              <span 
+                :class="[
+                  'text-sm ml-2',
+                  isItemCompleted(groupedItem.itemId, groupedItem.totalQuantity)
+                    ? 'text-green-400 font-semibold'
+                    : 'text-dark-text-secondary'
+                ]"
+              >
+                / {{ groupedItem.totalQuantity }}
+              </span>
             </div>
           </div>
         </div>
@@ -155,7 +186,24 @@
               <span v-else class="text-xs text-dark-text-secondary">IMG</span>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-dark-text text-sm break-words">{{ groupedItem.itemName }}</h3>
+              <h3 
+                :class="[
+                  'font-semibold text-sm break-words flex items-center gap-2',
+                  isItemCompleted(groupedItem.itemId, groupedItem.totalQuantity)
+                    ? 'text-green-400'
+                    : 'text-dark-text'
+                ]"
+              >
+                {{ groupedItem.itemName }}
+                <svg 
+                  v-if="isItemCompleted(groupedItem.itemId, groupedItem.totalQuantity)"
+                  class="w-3 h-3 text-green-400 flex-shrink-0" 
+                  fill="currentColor" 
+                  viewBox="0 0 20 20"
+                >
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              </h3>
             </div>
           </div>
 
@@ -252,7 +300,16 @@
               </button>
             </div>
             <div class="text-center mt-2">
-              <span class="text-xs text-dark-text-secondary">{{ getCurrentQuantity(groupedItem.itemId) }} / {{ groupedItem.totalQuantity }}</span>
+              <span 
+                :class="[
+                  'text-xs',
+                  isItemCompleted(groupedItem.itemId, groupedItem.totalQuantity)
+                    ? 'text-green-400 font-semibold'
+                    : 'text-dark-text-secondary'
+                ]"
+              >
+                {{ getCurrentQuantity(groupedItem.itemId) }} / {{ groupedItem.totalQuantity }}
+              </span>
             </div>
           </div>
         </div>
@@ -323,6 +380,12 @@ const groupedItemRequirements = computed(() => {
     debouncedSearchQuery.value
   )
 })
+
+// Check if an item has the required quantity
+const isItemCompleted = (itemId, requiredQuantity) => {
+  const current = getCurrentQuantity(itemId)
+  return current >= requiredQuantity
+}
 
 // Helper functions for display
 const getTraderInitial = (traderName) => {
