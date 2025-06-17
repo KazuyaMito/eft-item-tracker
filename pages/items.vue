@@ -269,12 +269,13 @@ import { useDebounce } from '~/composables/useDebounce'
 import { hideoutStations } from '~/data/hideout'
 
 const { user, signInWithGoogle } = useAuth()
-const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress } = useFirestore()
+const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress, getUserTaskCompletion } = useFirestore()
 const { showNonKappaTasks } = useSettings()
 const { isMobile } = useBreakpoint()
 
-// Hideout progress for filtering requirements
+// Progress for filtering requirements
 const hideoutProgress = ref({})
+const completedTasks = ref({})
 
 const searchQuery = ref('')
 const { debouncedValue: debouncedSearchQuery, setValue: setDebouncedSearch } = useDebounce('', 300)
@@ -282,7 +283,8 @@ const { debouncedValue: debouncedSearchQuery, setValue: setDebouncedSearch } = u
 // Initialize item requirements composable
 const { baseGroupedItemRequirements } = useItemRequirements({
   showNonKappaTasks,
-  hideoutProgress
+  hideoutProgress,
+  completedTasks
 })
 
 // Initialize item quantity composable
@@ -405,14 +407,28 @@ const loadHideoutProgress = async () => {
   }
 }
 
+// Load completed tasks from Firestore
+const loadCompletedTasks = async () => {
+  if (!user.value) return
+  
+  try {
+    const tasks = await getUserTaskCompletion(user.value.uid)
+    completedTasks.value = tasks || {}
+  } catch (error) {
+    console.error('Failed to load completed tasks:', error)
+  }
+}
+
 // Watch for user changes
 watch(user, (newUser) => {
   if (newUser) {
     loadUserItems()
     loadHideoutProgress()
+    loadCompletedTasks()
   } else {
     clearQuantities()
     hideoutProgress.value = {}
+    completedTasks.value = {}
   }
 }, { immediate: true })
 
