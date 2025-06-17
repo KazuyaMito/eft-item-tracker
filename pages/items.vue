@@ -31,9 +31,10 @@
         :key="groupedItem.itemId"
         class="bg-dark-card rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
       >
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div class="flex items-center space-x-3 md:space-x-4 flex-1 min-w-0">
-            <div class="w-12 h-12 md:w-16 md:h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+        <!-- PC Layout -->
+        <div v-if="!isMobile" class="flex items-center justify-between">
+          <div class="flex items-center space-x-4 flex-1">
+            <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
               <img 
                 v-if="groupedItem.itemIconLink"
                 :src="groupedItem.itemIconLink"
@@ -45,7 +46,7 @@
             </div>
             
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-dark-text truncate text-sm md:text-base">{{ groupedItem.itemName }}</h3>
+              <h3 class="font-semibold text-dark-text truncate">{{ groupedItem.itemName }}</h3>
               <div class="space-y-1">
                 <div
                   v-for="source in groupedItem.sources"
@@ -104,9 +105,8 @@
               </div>
             </div>
             
-          <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2">
-            <span class="text-xs md:text-sm text-dark-text-secondary whitespace-nowrap">Found in Raid:</span>
-            <div class="flex items-center justify-center md:justify-start space-x-2">
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-dark-text-secondary mr-2">Found in Raid:</span>
               <button
                 @click="decrementQuantity(groupedItem.itemId)"
                 class="w-8 h-8 rounded-full bg-dark-surface hover:bg-dark-hover flex items-center justify-center transition-colors"
@@ -135,9 +135,125 @@
                 </svg>
               </button>
               
-              <span class="text-xs md:text-sm text-dark-text-secondary whitespace-nowrap">/ {{ groupedItem.totalQuantity }}</span>
+              <span class="text-sm text-dark-text-secondary ml-2">/ {{ groupedItem.totalQuantity }}</span>
             </div>
           </div>
+        </div>
+
+        <!-- Mobile Layout -->
+        <div v-else class="flex flex-col space-y-4">
+          <!-- アイテム情報セクション -->
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img 
+                v-if="groupedItem.itemIconLink"
+                :src="groupedItem.itemIconLink"
+                :alt="groupedItem.itemName"
+                class="w-full h-full object-cover"
+                @error="$event.target.style.display='none'"
+              />
+              <span v-else class="text-xs text-dark-text-secondary">IMG</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-dark-text text-sm break-words">{{ groupedItem.itemName }}</h3>
+            </div>
+          </div>
+
+          <!-- ソース情報セクション -->
+          <div class="space-y-2">
+            <div
+              v-for="source in groupedItem.sources"
+              :key="source.sourceId"
+              class="flex items-center space-x-2"
+            >
+              <div class="flex items-center space-x-2">
+                <div
+                  v-if="source.source === 'task'"
+                  class="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  :title="source.traderName"
+                >
+                  <img
+                    :src="getTraderImage(source.traderName)"
+                    :alt="source.traderName"
+                    class="w-full h-full object-cover"
+                    @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
+                  >
+                  <div
+                    class="w-full h-full bg-dark-surface rounded-full items-center justify-center text-xs text-dark-text-secondary hidden"
+                  >
+                    {{ getTraderInitial(source.traderName) }}
+                  </div>
+                </div>
+                <div
+                  v-else-if="source.source === 'hideout'"
+                  class="w-4 h-4 rounded flex items-center justify-center flex-shrink-0 overflow-hidden"
+                  :title="getHideoutStationName(source.sourceId)"
+                >
+                  <img
+                    :src="getHideoutImage(source.sourceId)"
+                    :alt="getHideoutStationName(source.sourceId)"
+                    class="w-full h-full object-cover"
+                    @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
+                  >
+                  <div
+                    class="w-full h-full bg-amber-800 rounded items-center justify-center text-xs text-amber-200 hidden"
+                  >
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                  </div>
+                </div>
+                <p
+                  :class="[
+                    'text-xs truncate px-2 py-1 rounded',
+                    source.source === 'task' 
+                      ? 'bg-blue-900 text-blue-200' 
+                      : 'bg-green-900 text-green-200'
+                  ]"
+                >
+                  {{ source.sourceName }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- コントロールセクション -->
+          <div class="bg-dark-surface rounded-lg p-3">
+            <div class="text-center mb-3">
+              <span class="text-xs text-dark-text-secondary">Found in Raid</span>
+            </div>
+            <div class="flex items-center justify-center space-x-3">
+              <button
+                @click="decrementQuantity(groupedItem.itemId)"
+                class="w-8 h-8 rounded-full bg-dark-card hover:bg-dark-hover flex items-center justify-center transition-colors"
+                :disabled="getCurrentQuantity(groupedItem.itemId) <= 0"
+              >
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                </svg>
+              </button>
+              
+              <input
+                :value="getCurrentQuantity(groupedItem.itemId)"
+                @input="updateQuantity(groupedItem.itemId, $event.target.value)"
+                @blur="saveQuantity(groupedItem.itemId)"
+                type="number"
+                min="0"
+                class="w-16 px-2 py-1 text-center border border-dark-surface rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-dark-card text-dark-text text-sm"
+              >
+              
+              <button
+                @click="incrementQuantity(groupedItem.itemId)"
+                class="w-8 h-8 rounded-full bg-dark-card hover:bg-dark-hover flex items-center justify-center transition-colors"
+              >
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div class="text-center mt-2">
+              <span class="text-xs text-dark-text-secondary">{{ getCurrentQuantity(groupedItem.itemId) }} / {{ groupedItem.totalQuantity }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -155,6 +271,7 @@ import { hideoutStations } from '~/data/hideout'
 const { user, signInWithGoogle } = useAuth()
 const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress } = useFirestore()
 const { showNonKappaTasks } = useSettings()
+const { isMobile } = useBreakpoint()
 
 // Hideout progress for filtering requirements
 const hideoutProgress = ref({})
