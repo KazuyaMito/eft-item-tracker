@@ -151,6 +151,7 @@ export function filterItemRequirements(
     const item = getItemById(req.itemId)
     return item && (
       item.name.toLowerCase().includes(query) ||
+      (item.shortName && item.shortName.toLowerCase().includes(query)) ||
       req.sourceName.toLowerCase().includes(query)
     )
   })
@@ -163,10 +164,12 @@ export function filterGroupedItemRequirements(
   if (!searchQuery) return groupedRequirements
   
   const query = searchQuery.toLowerCase()
-  return groupedRequirements.filter(req => 
-    req.itemName.toLowerCase().includes(query) ||
-    req.sources.some(source => 
-      source.sourceName.toLowerCase().includes(query)
-    )
-  )
+  return groupedRequirements.filter(req => {
+    const item = getItemById(req.itemId)
+    return req.itemName.toLowerCase().includes(query) ||
+           (item && item.shortName && item.shortName.toLowerCase().includes(query)) ||
+           req.sources.some(source => 
+             source.sourceName.toLowerCase().includes(query)
+           )
+  })
 }
