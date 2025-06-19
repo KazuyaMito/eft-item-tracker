@@ -1,5 +1,6 @@
 import { doc, setDoc, getDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore'
 import type { EFTTask } from '~/types'
+import { eftTasks } from '~/data/tasks'
 
 export interface TaskCompletionStatus {
   taskId: string
@@ -104,14 +105,41 @@ export const useTaskCompletion = () => {
   const uncompleteTask = async (taskId: string) => {
     if (!user.value) return
     
+    const batch = writeBatch($firebase.db)
+    const now = new Date()
+    
     try {
-      const docRef = doc($firebase.db, 'taskCompletions', `${user.value.uid}_${taskId}`)
-      await setDoc(docRef, {
+      // Set the uncompleted task back to pending
+      const taskDocRef = doc($firebase.db, 'taskCompletions', `${user.value.uid}_${taskId}`)
+      batch.set(taskDocRef, {
         taskId,
         userId: user.value.uid,
         status: 'pending',
-        updatedAt: new Date()
+        updatedAt: now
       } as TaskCompletionStatus)
+      
+      // Find the task to get its parallel tasks
+      const task = eftTasks.find(t => t.id === taskId)
+      
+      // Restore parallel tasks that were marked as 'failed' back to 'pending'
+      if (task && task.parallelTaskIds && task.parallelTaskIds.length > 0) {
+        for (const parallelTaskId of task.parallelTaskIds) {
+          const parallelDocRef = doc($firebase.db, 'taskCompletions', `${user.value.uid}_${parallelTaskId}`)
+          
+          // Only restore tasks that are currently failed
+          const existingStatus = await getTaskStatus(parallelTaskId)
+          if (existingStatus && existingStatus.status === 'failed') {
+            batch.set(parallelDocRef, {
+              taskId: parallelTaskId,
+              userId: user.value.uid,
+              status: 'pending',
+              updatedAt: now
+            } as TaskCompletionStatus)
+          }
+        }
+      }
+      
+      await batch.commit()
       
       // Refresh the local cache
       await getUserTaskStatuses()
