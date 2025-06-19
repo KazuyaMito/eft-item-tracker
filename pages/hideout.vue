@@ -370,7 +370,7 @@ import { hideoutStations } from '~/data/hideout'
 import { getItemById } from '~/data/items'
 
 const { user, signInWithGoogle } = useAuth()
-const { getUserItemCollection, saveUserHideoutProgress, getUserHideoutProgress } = useFirestore()
+const { getUserItemCollection, saveUserHideoutProgress, getUserHideoutProgress, reduceItemsForHideout } = useFirestore()
 const { gameEdition } = useSettings()
 const { isMobile } = useBreakpoint()
 
@@ -444,13 +444,23 @@ const upgradeStation = async (stationId, newLevel) => {
   const levelObj = station.levels.find(l => l.level === newLevel)
   if (!levelObj || !isLevelBuildable(stationId, levelObj)) return
   
-  stationLevels.value[stationId] = newLevel
-  
   try {
+    // First reduce the required items from user's inventory
+    if (levelObj.requirements && levelObj.requirements.length > 0) {
+      await reduceItemsForHideout(user.value.uid, levelObj.requirements)
+    }
+    
+    // Then save the hideout progress
     await saveUserHideoutProgress(user.value.uid, stationId, newLevel)
+    
+    // Update local state
+    stationLevels.value[stationId] = newLevel
+    
+    // Reload user items to reflect the changes
+    await loadUserItems()
   } catch (error) {
-    console.error('Failed to save hideout progress:', error)
-    stationLevels.value[stationId] = newLevel - 1
+    console.error('Failed to upgrade station:', error)
+    // Don't update the state if there was an error
   }
 }
 
