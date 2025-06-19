@@ -257,6 +257,35 @@ export const useFirestore = () => {
     }
   }
 
+  const reduceItemsForHideout = async (userId, requirements) => {
+    try {
+      // Process each requirement and reduce the quantities (hideout items are always FIR)
+      for (const requirement of requirements) {
+        const itemRef = doc($firebase.db, 'userItems', `${userId}_${requirement.itemId}`)
+        const itemDoc = await getDoc(itemRef)
+        
+        if (itemDoc.exists()) {
+          const currentData = itemDoc.data()
+          const currentQuantity = currentData.quantity || 0
+          const currentFIR = currentData.foundInRaid || 0
+          
+          // Hideout requires FIR items, so reduce from both total and FIR
+          const newFIR = Math.max(0, currentFIR - requirement.quantity)
+          const newQuantity = Math.max(0, currentQuantity - requirement.quantity)
+          
+          await updateDoc(itemRef, {
+            quantity: newQuantity,
+            foundInRaid: newFIR,
+            updatedAt: serverTimestamp()
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error reducing items for hideout:', error)
+      throw error
+    }
+  }
+
   const savePlayerLevel = async (userId, level) => {
     try {
       const userRef = doc($firebase.db, 'users', userId)
@@ -301,6 +330,7 @@ export const useFirestore = () => {
     saveCompletedTask,
     getCompletedTasks,
     reduceItemsForTask,
+    reduceItemsForHideout,
     savePlayerLevel,
     getPlayerLevel
   }
