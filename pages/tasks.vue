@@ -602,7 +602,10 @@ const filteredTasks = computed(() => {
         case 'completed':
           return completed
         case 'available':
-          return !completed && available
+          // Don't show failed tasks in available filter
+          const status = taskCompletionStatuses.value[task.id]?.status
+          const isFailed = status === 'failed'
+          return !completed && !isFailed && available
         case 'locked':
           return !completed && !available
         default:
