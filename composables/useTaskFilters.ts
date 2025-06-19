@@ -25,26 +25,7 @@ export function useTaskFilters(options: UseTaskFiltersOptions) {
       return true
     }
     
-    // Handle parallel tasks: if task has parallelTaskIds, check if any of the parallel group
-    // has its prerequisites met (not their own circular prerequisites)
-    if (task.parallelTaskIds && task.parallelTaskIds.length > 0) {
-      // For parallel tasks, we need to find the "parent" task that they branch from
-      // Look for a common prerequisite among all parallel tasks
-      const allTasks = [...tasks.value] // Access from the options
-      const parentTask = allTasks.find(t => 
-        task.prerequisites.includes(t.id) && 
-        !t.parallelTaskIds?.includes(task.id)
-      )
-      
-      if (parentTask) {
-        // Check if the parent task's prerequisites are met
-        if (!parentTask.prerequisites || parentTask.prerequisites.length === 0) {
-          return true
-        }
-        return parentTask.prerequisites.every(prereqId => isTaskCompleted(prereqId))
-      }
-    }
-    
+    // With corrected prerequisites from task parsing, we can now simply check them
     return task.prerequisites.every(prereqId => isTaskCompleted(prereqId))
   }
   
@@ -136,21 +117,7 @@ export function filterTasksByStatus(
       return true
     }
     
-    // Handle parallel tasks
-    if (task.parallelTaskIds && task.parallelTaskIds.length > 0) {
-      const parentTask = tasks.find(t => 
-        task.prerequisites.includes(t.id) && 
-        !t.parallelTaskIds?.includes(task.id)
-      )
-      
-      if (parentTask) {
-        if (!parentTask.prerequisites || parentTask.prerequisites.length === 0) {
-          return true
-        }
-        return parentTask.prerequisites.every(prereqId => isTaskCompletedFn(prereqId))
-      }
-    }
-    
+    // With corrected prerequisites from task parsing, we can now simply check them
     return task.prerequisites.every(prereqId => isTaskCompletedFn(prereqId))
   }
   
