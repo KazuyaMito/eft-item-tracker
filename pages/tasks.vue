@@ -719,6 +719,23 @@ const isTaskAvailable = (task) => {
     return true
   }
   
+  // Handle parallel tasks: if task has parallelTaskIds, check if the parent task is available
+  if (task.parallelTaskIds && task.parallelTaskIds.length > 0) {
+    // For parallel tasks, find the parent task they branch from
+    const parentTask = eftTasks.find(t => 
+      task.prerequisites.includes(t.id) && 
+      !t.parallelTaskIds?.includes(task.id)
+    )
+    
+    if (parentTask) {
+      // Check if the parent task's prerequisites are met (not the parent itself)
+      if (!parentTask.prerequisites || parentTask.prerequisites.length === 0) {
+        return true
+      }
+      return parentTask.prerequisites.every(prereqId => isTaskCompleted(prereqId))
+    }
+  }
+  
   // Check if all prerequisite tasks are completed
   return task.prerequisites.every(prereqId => isTaskCompleted(prereqId))
 }
