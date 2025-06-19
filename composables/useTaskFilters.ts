@@ -93,6 +93,7 @@ export function useTaskFilters(options: UseTaskFiltersOptions) {
           case 'completed':
             return completed
           case 'available':
+            // Don't show failed tasks in available filter - use task completion system
             return !completed && available
           case 'locked':
             return !completed && !available
@@ -161,6 +162,7 @@ export function filterTasksByStatus(
       case 'completed':
         return completed
       case 'available':
+        // Don't show failed tasks in available filter - rely on task completion system
         return !completed && available
       case 'locked':
         return !completed && !available
