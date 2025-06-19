@@ -34,7 +34,8 @@ const fetchTasks = async () => {
     const { getTasks } = useTarkovAPI()
     const tasks = await getTasks()
     
-    cachedTasks = tasks.map((task: any) => {
+    // First pass: create basic task objects
+    const basicTasks = tasks.map((task: any) => {
       // Extract item requirements from objectives
       const requirements = task.objectives
         ?.filter((obj: any) => obj.type === 'giveItem' && obj.item)
@@ -57,7 +58,7 @@ const fetchTasks = async () => {
         .map((condition: any) => condition.task?.id)
         .filter(Boolean) || []
 
-      const baseTask = {
+      return {
         id: task.id,
         name: task.name,
         trader: task.trader?.name || 'Unknown',
@@ -76,11 +77,62 @@ const fetchTasks = async () => {
         wikiLink: task.wikiLink,
         taskRequirements: task.taskRequirements || [],
         traderLevelRequirements: task.traderLevelRequirements || [],
-        prerequisites: task.taskRequirements?.map((req: any) => req.task?.id).filter(Boolean) || [],
-        parallelTaskIds // Add parallel tasks from API
+        rawPrerequisites: task.taskRequirements?.map((req: any) => req.task?.id).filter(Boolean) || [],
+        parallelTaskIds
       }
+    })
+
+    // Second pass: fix prerequisites for parallel tasks
+    // First, build a map of all parallel task groups to find shared prerequisites
+    const parallelTaskGroups = new Map<string, Set<string>>()
+    
+    // Group all parallel tasks together
+    basicTasks.forEach((task: any) => {
+      if (task.parallelTaskIds && task.parallelTaskIds.length > 0) {
+        // Create a group with current task and all its parallel tasks
+        const group = new Set([task.id, ...task.parallelTaskIds])
+        const groupKey = Array.from(group).sort().join(',')
+        parallelTaskGroups.set(groupKey, group)
+      }
+    })
+    
+    // Third pass: build prerequisite correction map for parallel tasks
+    const taskPrerequisiteMap = new Map<string, string[]>()
+    
+    parallelTaskGroups.forEach((group) => {
+      const groupTasks = basicTasks.filter((task: any) => group.has(task.id))
       
-      return baseTask
+      // Collect all non-circular prerequisites from all tasks in the group
+      const realPrerequisites = new Set<string>()
+      
+      groupTasks.forEach(task => {
+        if (task.rawPrerequisites && task.rawPrerequisites.length > 0) {
+          task.rawPrerequisites.forEach((prereqId: string) => {
+            // Only include prerequisites that are NOT in the same parallel group
+            if (!group.has(prereqId)) {
+              realPrerequisites.add(prereqId)
+            }
+          })
+        }
+      })
+      
+      // Set the same prerequisites for all tasks in the group
+      const sharedPrereqs = Array.from(realPrerequisites)
+      group.forEach(taskId => {
+        taskPrerequisiteMap.set(taskId, sharedPrereqs)
+      })
+    })
+
+    // Final pass: apply corrected prerequisites
+    cachedTasks = basicTasks.map((task: any) => {
+      const correctedPrerequisites = taskPrerequisiteMap.get(task.id) || task.rawPrerequisites
+
+      // Return the final task with corrected prerequisites
+      const { rawPrerequisites, ...finalTask } = task
+      return {
+        ...finalTask,
+        prerequisites: correctedPrerequisites
+      }
     })
     
     lastFetchTime = now
