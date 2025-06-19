@@ -516,6 +516,13 @@
 import { doc, getDoc } from 'firebase/firestore'
 import { eftTasks, getTasksByTrader } from '~/data/tasks'
 import { getItemById } from '~/data/items'
+import { 
+  filterTasks, 
+  isTaskAvailable as checkTaskAvailable, 
+  calculateItemProgress, 
+  canCompleteTask as checkCanCompleteTask,
+  sortTraders 
+} from '~/utils/taskPageLogic'
 
 const { user, signInWithGoogle } = useAuth()
 const { getUserItemCollection, updateUserItemCollection, saveUserTaskObjectives, getUserTaskObjectives, saveCompletedTask, getCompletedTasks, reduceItemsForTask } = useFirestore()
@@ -540,81 +547,21 @@ const traderData = ref([])
 const showTasksAboveLevel = ref(false)
 
 const traders = computed(() => {
-  const traderOrder = ['prapor', 'therapist', 'fence', 'skier', 'peacekeeper', 'mechanic', 'ragman', 'jaeger', 'ref', 'btrdriver', 'lightkeeper']
   const traderList = [...new Set(eftTasks.map(task => task.trader))]
-  
-  // Sort traders according to the specified order
-  return traderList.sort((a, b) => {
-    const aIndex = traderOrder.findIndex(t => t.toLowerCase() === a.toLowerCase())
-    const bIndex = traderOrder.findIndex(t => t.toLowerCase() === b.toLowerCase())
-    
-    // If both are in the order array, sort by their position
-    if (aIndex !== -1 && bIndex !== -1) {
-      return aIndex - bIndex
-    }
-    // If only one is in the order array, it comes first
-    if (aIndex !== -1) return -1
-    if (bIndex !== -1) return 1
-    // If neither is in the order array, sort alphabetically
-    return a.localeCompare(b)
-  })
+  return sortTraders(traderList)
 })
 
 const filteredTasks = computed(() => {
-  let tasks = eftTasks
-  
-  // Apply category filter
-  if (selectedCategory.value === 'traders' && selectedTrader.value) {
-    tasks = getTasksByTrader(selectedTrader.value)
+  const filters = {
+    selectedCategory: selectedCategory.value,
+    selectedTrader: selectedTrader.value,
+    selectedFilter: selectedFilter.value,
+    showNonKappaTasks: showNonKappaTasks.value,
+    showTasksAboveLevel: showTasksAboveLevel.value,
+    playerLevel: playerLevel.value
   }
   
-  // Apply non-Kappa filter if setting is disabled
-  if (!showNonKappaTasks.value) {
-    tasks = tasks.filter(task => task.kappaRequired === true)
-  }
-  
-  // Filter by player level if showTasksAboveLevel is false
-  if (!showTasksAboveLevel.value) {
-    tasks = tasks.filter(task => {
-      return task.level <= playerLevel.value
-    })
-  }
-  
-  // Filter out tasks with incomplete prerequisites
-  tasks = tasks.filter(task => {
-    // If task has prerequisites, check if they are all completed
-    if (task.prerequisites && task.prerequisites.length > 0) {
-      const allPrerequisitesCompleted = task.prerequisites.every(prereqId => isTaskCompleted(prereqId))
-      if (!allPrerequisitesCompleted) {
-        return false
-      }
-    }
-    return true
-  })
-  
-  // Apply status filter
-  if (selectedFilter.value !== 'all') {
-    tasks = tasks.filter(task => {
-      const completed = isTaskCompleted(task.id)
-      const available = isTaskAvailable(task)
-      
-      switch (selectedFilter.value) {
-        case 'completed':
-          return completed
-        case 'available':
-          // Don't show failed tasks in available filter
-          const status = taskCompletionStatuses.value[task.id]?.status
-          const isFailed = status === 'failed'
-          return !completed && !isFailed && available
-        case 'locked':
-          return !completed && !available
-        default:
-          return true
-      }
-    })
-  }
-  
-  return tasks
+  return filterTasks(eftTasks, filters, taskCompletionStatuses.value)
 })
 
 const getItemName = (itemId) => {
@@ -628,26 +575,21 @@ const getTaskName = (taskId) => {
 }
 
 const getUserItemCount = (itemId, foundInRaid) => {
-  const item = userItems.value[itemId]
-  if (!item) return 0
-  
-  return foundInRaid ? (item.foundInRaid || 0) : (item.quantity || 0)
+  const progress = calculateItemProgress(
+    { itemId, quantity: 1, foundInRaid },
+    userItems.value
+  )
+  return progress.current
 }
 
 const getProgressClass = (requirement) => {
-  const current = getUserItemCount(requirement.itemId, requirement.foundInRaid)
-  const needed = requirement.quantity
-  
-  if (current >= needed) return 'text-green-600'
-  if (current > 0) return 'text-yellow-600'
-  return 'text-red-600'
+  const progress = calculateItemProgress(requirement, userItems.value)
+  return progress.progressClass
 }
 
 const getProgressPercentage = (requirement) => {
-  const current = getUserItemCount(requirement.itemId, requirement.foundInRaid)
-  const needed = requirement.quantity
-  
-  return Math.min(Math.round((current / needed) * 100), 100)
+  const progress = calculateItemProgress(requirement, userItems.value)
+  return progress.percentage
 }
 
 const loadUserItems = async () => {
@@ -717,21 +659,11 @@ const isTaskCompleted = (taskId) => {
 }
 
 const isTaskAvailable = (task) => {
-  // If task has no prerequisites, it's available
-  if (!task.prerequisites || task.prerequisites.length === 0) {
-    return true
-  }
-  
-  // With corrected prerequisites from task parsing, we can now simply check them
-  return task.prerequisites.every(prereqId => isTaskCompleted(prereqId))
+  return checkTaskAvailable(task, taskCompletionStatuses.value)
 }
 
 const canCompleteTask = (task) => {
-  // Check if already completed or failed
-  const status = taskCompletionStatuses.value[task.id]?.status
-  if (status === 'completed' || status === 'failed') return false
-  
-  return true
+  return checkCanCompleteTask(task, taskCompletionStatuses.value)
 }
 
 const getTraderImage = (traderName) => {
@@ -778,30 +710,9 @@ const completeTask = async (task) => {
       }
     }
     
-    // Add required items to user's collection
+    // Reduce required items from user's collection
     if (task.requirements && task.requirements.length > 0) {
-      for (const requirement of task.requirements) {
-        const itemRef = doc($firebase.db, 'userItems', `${user.value.uid}_${requirement.itemId}`)
-        const itemDoc = await getDoc(itemRef)
-        
-        let currentQuantity = 0
-        let currentFIR = 0
-        
-        if (itemDoc.exists()) {
-          const data = itemDoc.data()
-          currentQuantity = data.quantity || 0
-          currentFIR = data.foundInRaid || 0
-        }
-        
-        // Add the required quantity to the user's collection
-        const newQuantity = currentQuantity + requirement.quantity
-        const newFIR = requirement.foundInRaid ? currentFIR + requirement.quantity : currentFIR
-        
-        await updateUserItemCollection(user.value.uid, requirement.itemId, {
-          quantity: newQuantity,
-          foundInRaid: newFIR
-        })
-      }
+      await reduceItemsForTask(user.value.uid, task.requirements)
     }
     
     // Use the new composable to complete task (handles parallel tasks)
@@ -830,42 +741,29 @@ const uncompleteTask = async (task) => {
   uncompletingTask.value = task.id
   
   try {
-    // First, remove the items that were added when completing the task
+    // Restore the items that were reduced when completing the task
     if (task.requirements && task.requirements.length > 0) {
       for (const requirement of task.requirements) {
         const itemRef = doc($firebase.db, 'userItems', `${user.value.uid}_${requirement.itemId}`)
         const itemDoc = await getDoc(itemRef)
         
+        let currentQuantity = 0
+        let currentFIR = 0
+        
         if (itemDoc.exists()) {
           const data = itemDoc.data()
-          let currentQuantity = data.quantity || 0
-          let currentFIR = data.foundInRaid || 0
-          
-          // Subtract the required quantity from the user's collection
-          const newQuantity = Math.max(0, currentQuantity - requirement.quantity)
-          let newFIR = currentFIR
-          
-          if (requirement.foundInRaid) {
-            // Remove from FIR count
-            newFIR = Math.max(0, currentFIR - requirement.quantity)
-          } else {
-            // Remove from regular items first, then FIR if needed
-            const regularItems = currentQuantity - currentFIR
-            if (regularItems >= requirement.quantity) {
-              // Can remove all from regular items
-              newFIR = currentFIR
-            } else {
-              // Need to remove some from FIR items
-              const fromFIR = requirement.quantity - regularItems
-              newFIR = Math.max(0, currentFIR - fromFIR)
-            }
-          }
-          
-          await updateUserItemCollection(user.value.uid, requirement.itemId, {
-            quantity: newQuantity,
-            foundInRaid: newFIR
-          })
+          currentQuantity = data.quantity || 0
+          currentFIR = data.foundInRaid || 0
         }
+        
+        // Restore the required quantity to the user's collection
+        const newQuantity = currentQuantity + requirement.quantity
+        const newFIR = requirement.foundInRaid ? currentFIR + requirement.quantity : currentFIR
+        
+        await updateUserItemCollection(user.value.uid, requirement.itemId, {
+          quantity: newQuantity,
+          foundInRaid: newFIR
+        })
       }
     }
     
