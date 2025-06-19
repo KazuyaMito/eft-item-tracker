@@ -24,6 +24,27 @@ export function useTaskFilters(options: UseTaskFiltersOptions) {
     if (!task.prerequisites || task.prerequisites.length === 0) {
       return true
     }
+    
+    // Handle parallel tasks: if task has parallelTaskIds, check if any of the parallel group
+    // has its prerequisites met (not their own circular prerequisites)
+    if (task.parallelTaskIds && task.parallelTaskIds.length > 0) {
+      // For parallel tasks, we need to find the "parent" task that they branch from
+      // Look for a common prerequisite among all parallel tasks
+      const allTasks = [...tasks.value] // Access from the options
+      const parentTask = allTasks.find(t => 
+        task.prerequisites.includes(t.id) && 
+        !t.parallelTaskIds?.includes(task.id)
+      )
+      
+      if (parentTask) {
+        // Check if the parent task's prerequisites are met
+        if (!parentTask.prerequisites || parentTask.prerequisites.length === 0) {
+          return true
+        }
+        return parentTask.prerequisites.every(prereqId => isTaskCompleted(prereqId))
+      }
+    }
+    
     return task.prerequisites.every(prereqId => isTaskCompleted(prereqId))
   }
   
@@ -105,10 +126,36 @@ export function filterTasksByStatus(
   status: 'available' | 'locked' | 'completed',
   completedTasks: Record<string, boolean>
 ): EFTTask[] {
+  const isTaskCompletedFn = (taskId: string): boolean => {
+    return completedTasks[taskId] === true
+  }
+  
+  const isTaskAvailableFn = (task: EFTTask): boolean => {
+    if (!task.prerequisites || task.prerequisites.length === 0) {
+      return true
+    }
+    
+    // Handle parallel tasks
+    if (task.parallelTaskIds && task.parallelTaskIds.length > 0) {
+      const parentTask = tasks.find(t => 
+        task.prerequisites.includes(t.id) && 
+        !t.parallelTaskIds?.includes(task.id)
+      )
+      
+      if (parentTask) {
+        if (!parentTask.prerequisites || parentTask.prerequisites.length === 0) {
+          return true
+        }
+        return parentTask.prerequisites.every(prereqId => isTaskCompletedFn(prereqId))
+      }
+    }
+    
+    return task.prerequisites.every(prereqId => isTaskCompletedFn(prereqId))
+  }
+  
   return tasks.filter(task => {
-    const completed = completedTasks[task.id] === true
-    const available = !task.prerequisites || task.prerequisites.length === 0 ||
-      task.prerequisites.every(prereqId => completedTasks[prereqId] === true)
+    const completed = isTaskCompletedFn(task.id)
+    const available = isTaskAvailableFn(task)
     
     switch (status) {
       case 'completed':
