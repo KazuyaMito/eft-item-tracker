@@ -71,4 +71,14 @@
 
 <script setup>
 const { user, loading, signInWithGoogle } = useAuth()
+
+// SEO Meta tags
+useSeoMeta({
+  title: 'EFT Item Tracker - Track Your Escape from Tarkov Progress',
+  description: 'Track your Escape from Tarkov item collection, task completion, and hideout upgrades. Manage Found in Raid items, complete quests, and monitor your progress with our free EFT tracker tool.',
+  ogTitle: 'EFT Item Tracker - Track Your Escape from Tarkov Progress',
+  ogDescription: 'Track your Escape from Tarkov item collection, task completion, and hideout upgrades. Free tool for managing FIR items and quest progress.',
+  ogImage: '/og-image.png',
+  twitterCard: 'summary_large_image'
+})
 </script>

@@ -88,4 +88,13 @@ const toggleShowNonKappaTasks = () => {
 const handleGameEditionChange = (event) => {
   saveGameEdition(event.target.value)
 }
+
+// SEO Meta tags
+useSeoMeta({
+  title: 'Settings - EFT Item Tracker Configuration',
+  description: 'Configure your Escape from Tarkov tracker settings. Set your game edition for accurate stash level tracking and customize quest filters including Kappa container requirements.',
+  ogTitle: 'Settings - EFT Item Tracker Configuration',
+  ogDescription: 'Customize your EFT tracker experience with game edition settings and quest filter preferences.',
+  robots: 'noindex, nofollow' // Settings pages typically shouldn't be indexed
+})
 </script>

@@ -505,7 +505,12 @@ watch(user, (newUser) => {
   }
 }, { immediate: true })
 
-useHead({
-  title: 'Items - EFT Tracker'
+// SEO Meta tags
+useSeoMeta({
+  title: 'EFT Items Collection Tracker - Found in Raid Items Management',
+  description: 'Track and manage your Escape from Tarkov Found in Raid (FIR) items collection. Monitor item requirements for tasks and hideout upgrades. Search, filter, and track your EFT inventory progress.',
+  ogTitle: 'EFT Items Collection Tracker - Found in Raid Items Management',
+  ogDescription: 'Efficiently track Found in Raid items for Escape from Tarkov tasks and hideout upgrades. Complete item collection tracker with real-time progress updates.',
+  keywords: 'EFT items, Escape from Tarkov items, Found in Raid, FIR tracker, EFT inventory, Tarkov item tracker, quest items, hideout items'
 })
 </script>
