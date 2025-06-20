@@ -70,3 +70,6 @@ coverage/
 # temporary folders
 tmp/
 temp/
+
+# Claude Code configuration
+.claude/
