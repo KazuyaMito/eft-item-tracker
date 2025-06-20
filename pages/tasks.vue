@@ -813,8 +813,13 @@ onMounted(() => {
   loadTraderData()
 })
 
-useHead({
-  title: 'Tasks - EFT Tracker'
+// SEO Meta tags
+useSeoMeta({
+  title: 'EFT Tasks & Quest Tracker - Escape from Tarkov Quest Progress',
+  description: 'Complete quest tracker for Escape from Tarkov. Track trader tasks, monitor objectives, manage quest items, and view task prerequisites. Filter by trader, availability, and completion status.',
+  ogTitle: 'EFT Tasks & Quest Tracker - Complete Your Tarkov Quests',
+  ogDescription: 'Track all Escape from Tarkov quests and tasks. Monitor objectives, manage required items, and track your progress with all traders including Prapor, Therapist, Skier, and more.',
+  keywords: 'EFT tasks, Escape from Tarkov quests, Tarkov quest tracker, trader tasks, Prapor tasks, Therapist quests, Skier tasks, Peacekeeper quests, Mechanic tasks, Ragman quests, Jaeger tasks, quest objectives'
 })
 </script>
 

@@ -73,3 +73,6 @@ temp/
 
 # Claude Code configuration
 .claude/
+
+# Google Search Console verification files
+public/google*.html

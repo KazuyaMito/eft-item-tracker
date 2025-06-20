@@ -740,7 +740,12 @@ watch(gameEdition, async (newEdition) => {
   }
 })
 
-useHead({
-  title: 'Hideout - EFT Tracker'
+// SEO Meta tags
+useSeoMeta({
+  title: 'EFT Hideout Tracker - Escape from Tarkov Hideout Upgrade Progress',
+  description: 'Track your Escape from Tarkov hideout upgrade progress. Monitor station levels, required items, and prerequisites for all hideout modules including Workbench, Medstation, Nutrition Unit, and more.',
+  ogTitle: 'EFT Hideout Tracker - Complete Hideout Upgrade Management',
+  ogDescription: 'Comprehensive hideout tracker for Escape from Tarkov. Track all station upgrades, monitor item requirements, and manage your hideout progression efficiently.',
+  keywords: 'EFT hideout, Escape from Tarkov hideout, hideout tracker, hideout upgrades, workbench upgrade, medstation upgrade, bitcoin farm, scav case, intelligence center, nutrition unit, water collector, generator, heating, vents, security, illumination, stash upgrade'
 })
 </script>
