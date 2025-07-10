@@ -1,9 +1,16 @@
-import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin(async () => {
   const config = useRuntimeConfig()
+  
+  // Dynamic import for better code splitting
+  const [
+    { initializeApp },
+    { getAuth },
+    { getFirestore }
+  ] = await Promise.all([
+    import('firebase/app'),
+    import('firebase/auth'),
+    import('firebase/firestore')
+  ])
   
   const firebaseConfig = {
     apiKey: config.public.firebaseApiKey as string,

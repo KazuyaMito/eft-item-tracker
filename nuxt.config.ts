@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
-  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/sitemap'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/sitemap', '@nuxt/image'],
   
   nitro: {
     prerender: {
@@ -14,6 +14,24 @@ export default defineNuxtConfig({
   
   experimental: {
     payloadExtraction: false
+  },
+  
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 300,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+            'vendor': ['vue', '@vue/reactivity', '@vue/shared'],
+            'utils': ['~/utils/taskPageLogic']
+          }
+        }
+      }
+    },
+    esbuild: {
+      drop: ['console', 'debugger']
+    }
   },
   
   router: {
@@ -50,7 +68,11 @@ export default defineNuxtConfig({
         { name: 'twitter:description', content: 'Escape from Tarkov のアイテム管理ツール' }
       ],
       link: [
-        { rel: 'canonical', href: 'https://eft-item-tracker-441d2.web.app' }
+        { rel: 'canonical', href: 'https://eft-item-tracker-441d2.web.app' },
+        { rel: 'preconnect', href: 'https://assets.tarkov.dev' },
+        { rel: 'preconnect', href: 'https://firebaseapp.com' },
+        { rel: 'preconnect', href: 'https://googleapis.com' },
+        { rel: 'dns-prefetch', href: 'https://assets.tarkov.dev' }
       ],
       script: [
         {
