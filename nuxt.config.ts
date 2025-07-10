@@ -5,6 +5,23 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   modules: ['@nuxtjs/tailwindcss', '@nuxtjs/sitemap'],
   
+  nitro: {
+    prerender: {
+      routes: ['/sitemap.xml'],
+      crawlLinks: true
+    }
+  },
+  
+  experimental: {
+    payloadExtraction: false
+  },
+  
+  router: {
+    options: {
+      strict: true
+    }
+  },
+  
   app: {
     head: {
       htmlAttrs: {
