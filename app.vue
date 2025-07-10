@@ -3,7 +3,7 @@
     <NuxtRouteAnnouncer />
     <Header />
     <TabNavigation />
-    <main class="container mx-auto py-8 flex-1">
+    <main class="container mx-auto py-8 flex-1 min-h-[calc(100vh-240px)]">
       <NuxtPage />
     </main>
     <Footer />

@@ -1,7 +1,7 @@
 <template>
-  <footer class="mt-auto border-t border-dark-border bg-dark-card">
-    <div class="container mx-auto py-6 px-4">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+  <footer class="mt-auto border-t border-dark-border bg-dark-card min-h-[120px]">
+    <div class="container mx-auto py-6 px-4 h-full flex items-center">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
         <div class="text-sm text-dark-text-secondary">
           EFT Item Tracker - Track your Escape from Tarkov progress
         </div>
