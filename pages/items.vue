@@ -69,11 +69,14 @@
         <div v-if="!isMobile" class="flex items-center justify-between">
           <div class="flex items-center space-x-4 flex-1">
             <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
-              <img 
+              <NuxtImg 
                 v-if="groupedItem.itemIconLink"
                 :src="groupedItem.itemIconLink"
                 :alt="groupedItem.itemName"
                 class="w-full h-full object-cover"
+                loading="lazy"
+                width="64"
+                height="64"
                 @error="$event.target.style.display='none'"
               />
               <span v-else class="text-xs text-dark-text-secondary">IMG</span>
@@ -110,12 +113,15 @@
                       class="w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
                       :title="source.traderName"
                     >
-                      <img
+                      <NuxtImg
                         :src="getTraderImage(source.traderName)"
                         :alt="source.traderName"
                         class="w-full h-full object-cover"
+                        loading="lazy"
+                        width="20"
+                        height="20"
                         @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
-                      >
+                      />
                       <div
                         class="w-full h-full bg-dark-surface rounded-full items-center justify-center text-xs text-dark-text-secondary hidden"
                       >
@@ -127,12 +133,15 @@
                       class="w-4 h-4 md:w-5 md:h-5 rounded flex items-center justify-center flex-shrink-0 overflow-hidden"
                       :title="getHideoutStationName(source.sourceId)"
                     >
-                      <img
+                      <NuxtImg
                         :src="getHideoutImage(source.sourceId)"
                         :alt="getHideoutStationName(source.sourceId)"
                         class="w-full h-full object-cover"
+                        loading="lazy"
+                        width="20"
+                        height="20"
                         @error="$event.target.style.display='none'; $event.target.nextElementSibling.style.display='flex'"
-                      >
+                      />
                       <div
                         class="w-full h-full bg-amber-800 rounded items-center justify-center text-xs text-amber-200 hidden"
                       >
@@ -207,11 +216,14 @@
           <!-- アイテム情報セクション -->
           <div class="flex items-center space-x-3">
             <div class="w-12 h-12 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
-              <img 
+              <NuxtImg 
                 v-if="groupedItem.itemIconLink"
                 :src="groupedItem.itemIconLink"
                 :alt="groupedItem.itemName"
                 class="w-full h-full object-cover"
+                loading="lazy"
+                width="64"
+                height="64"
                 @error="$event.target.style.display='none'"
               />
               <span v-else class="text-xs text-dark-text-secondary">IMG</span>

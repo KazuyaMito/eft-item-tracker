@@ -27,12 +27,15 @@
         <div class="flex items-center space-x-2 md:space-x-4">
           <div class="flex items-center space-x-1 md:space-x-2 bg-dark-surface rounded-lg px-2 md:px-3 py-1 md:py-2">
             <span class="text-sm text-dark-text-secondary hidden sm:inline">Level</span>
-            <img 
+            <NuxtImg 
               :src="getLevelBadgeUrl(playerLevel)" 
               :alt="`Level ${playerLevel}`"
               class="w-6 h-6 md:w-8 md:h-8"
+              width="32"
+              height="32"
+              loading="lazy"
               @error="handleBadgeError"
-            >
+            />
             <button 
               @click="decrementLevel" 
               :disabled="playerLevel <= 1"
@@ -63,7 +66,7 @@
           
           <div v-if="!loading">
             <div v-if="user" class="flex items-center space-x-2 md:space-x-4">
-              <img :src="user.photoURL" :alt="user.displayName" class="w-6 h-6 md:w-8 md:h-8 rounded-full">
+              <NuxtImg :src="user.photoURL" :alt="user.displayName" class="w-6 h-6 md:w-8 md:h-8 rounded-full" width="32" height="32" loading="lazy" />
               <span class="text-sm text-dark-text hidden sm:inline">{{ user.displayName }}</span>
               <button 
                 @click="logout" 
