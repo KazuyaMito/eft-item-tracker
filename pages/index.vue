@@ -1,26 +1,6 @@
 <template>
   <div class="space-y-8">
-    <div v-if="!user && !loading && !isGuest" class="text-center py-16">
-      <h2 class="text-3xl font-bold text-dark-text mb-4">
-        Welcome to EFT Item Tracker
-      </h2>
-      <p class="text-xl text-dark-text-secondary mb-8">
-        Track your Escape from Tarkov item collection for tasks and hideout upgrades
-      </p>
-      <div class="space-y-4">
-        <button @click="signInWithGoogle" class="btn btn-primary text-lg px-8 py-3 block mx-auto">
-          Sign in with Google
-        </button>
-        <button @click="continueAsGuest" class="btn btn-secondary text-lg px-8 py-3 block mx-auto">
-          Continue as Guest
-        </button>
-        <p class="text-sm text-dark-text-secondary max-w-md mx-auto">
-          Guest mode allows you to use all features locally. Your data won't be saved to the cloud.
-        </p>
-      </div>
-    </div>
-
-    <div v-else-if="user || isGuest" class="space-y-6">
+    <div class="space-y-6">
       <div class="bg-dark-card rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-bold text-dark-text mb-4">
           <span v-if="user">Welcome back, {{ user.displayName }}!</span>
@@ -28,8 +8,8 @@
         </h2>
         <p class="text-dark-text-secondary">
           Track your item collection progress for tasks and hideout upgrades.
-          <span v-if="isGuest" class="text-yellow-500">
-            (Guest mode - data stored locally)
+          <span v-if="!user" class="text-yellow-500">
+            (Data stored locally - Sign in to sync across devices)
           </span>
         </p>
       </div>
@@ -73,10 +53,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <div v-else class="text-center py-16">
-      <div class="text-lg text-dark-text-secondary">Loading...</div>
     </div>
   </div>
 </template>

@@ -182,14 +182,7 @@
       </div>
     </div>
 
-    <div v-if="!user" class="text-center py-8">
-      <p class="text-dark-text-secondary mb-4">Please sign in to track your task progress</p>
-      <button @click="signInWithGoogle" class="btn btn-primary">
-        Sign in with Google
-      </button>
-    </div>
-
-    <div v-else class="space-y-4">
+    <div class="space-y-4">
       <div
         v-for="task in filteredTasks"
         :key="task.id"
@@ -525,6 +518,7 @@ import {
 } from '~/utils/taskPageLogic'
 
 const { user, signInWithGoogle } = useAuth()
+const { currentUserId, isLoggedIn } = useCurrentUser()
 const { getUserItemCollection, updateUserItemCollection, saveUserTaskObjectives, getUserTaskObjectives, saveCompletedTask, getCompletedTasks, reduceItemsForTask } = useFirestore()
 const { showNonKappaTasks } = useSettings()
 const { getTraders } = useTarkovAPI()

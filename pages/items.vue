@@ -54,19 +54,7 @@
       
     </div>
 
-    <div v-if="!user && !isGuest" class="text-center py-8">
-      <p class="text-dark-text-secondary mb-4">Please sign in or continue as guest to track your items</p>
-      <div class="space-y-2">
-        <button @click="signInWithGoogle" class="btn btn-primary block mx-auto">
-          Sign in with Google
-        </button>
-        <button @click="continueAsGuest" class="btn btn-secondary block mx-auto">
-          Continue as Guest
-        </button>
-      </div>
-    </div>
-
-    <div v-else class="space-y-4">
+    <div class="space-y-4">
       <div
         v-for="groupedItem in groupedItemRequirements"
         :key="groupedItem.itemId"

@@ -3,7 +3,7 @@
     <div class="bg-dark-card rounded-lg shadow-md p-6">
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-bold text-dark-text">Hideout</h1>
-        <div v-if="user" class="text-right">
+        <div class="text-right">
           <div class="text-lg font-semibold" :class="getOverallProgressClass()">
             {{ getOverallCompletedLevels() }} / {{ getTotalLevels() }} levels
           </div>
@@ -17,7 +17,7 @@
       </p>
       
       <!-- Filter Buttons -->
-      <div v-if="user" class="flex flex-wrap gap-2 mb-4">
+      <div class="flex flex-wrap gap-2 mb-4">
         <button
           @click="setFilter('available')"
           :class="[
@@ -66,14 +66,7 @@
       </div>
     </div>
 
-    <div v-if="!user" class="text-center py-8">
-      <p class="text-dark-text-secondary mb-4">Please sign in to track your hideout progress</p>
-      <button @click="signInWithGoogle" class="btn btn-primary">
-        Sign in with Google
-      </button>
-    </div>
-
-    <div v-else class="space-y-4">
+    <div class="space-y-4">
       <template v-for="station in hideoutStations" :key="station.id">
         <div
           v-if="getFilteredLevels(station).length > 0"
@@ -370,6 +363,7 @@ import { hideoutStations } from '~/data/hideout'
 import { getItemById } from '~/data/items'
 
 const { user, signInWithGoogle } = useAuth()
+const { currentUserId, isLoggedIn } = useCurrentUser()
 const { getUserItemCollection, saveUserHideoutProgress, getUserHideoutProgress, reduceItemsForHideout } = useFirestore()
 const { gameEdition } = useSettings()
 const { isMobile } = useBreakpoint()
