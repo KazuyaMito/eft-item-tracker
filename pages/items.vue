@@ -6,7 +6,7 @@
         Track your Found in Raid items for tasks and hideout upgrades.
       </p>
       
-      <div class="mb-6">
+      <div class="mb-6 space-y-4">
         <input
           :value="searchQuery"
           @input="handleSearchInput"
@@ -14,6 +14,42 @@
           placeholder="Search items..."
           class="w-full px-4 py-2 bg-dark-surface border border-dark-surface rounded-lg text-dark-text placeholder-dark-text-secondary focus:ring-2 focus:ring-blue-400 focus:border-transparent"
         >
+        
+        <div class="flex flex-wrap gap-4">
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              :checked="showTasks"
+              @change="toggleTasks"
+              class="w-4 h-4 text-blue-600 bg-dark-surface border-dark-border rounded focus:ring-blue-500 focus:ring-2"
+            >
+            <span class="text-sm text-dark-text flex items-center space-x-1">
+              <div class="w-4 h-4 bg-blue-900 rounded flex items-center justify-center">
+                <svg class="w-3 h-3 text-blue-200" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span>Tasks</span>
+            </span>
+          </label>
+          
+          <label class="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              :checked="showHideout"
+              @change="toggleHideout"
+              class="w-4 h-4 text-green-600 bg-dark-surface border-dark-border rounded focus:ring-green-500 focus:ring-2"
+            >
+            <span class="text-sm text-dark-text flex items-center space-x-1">
+              <div class="w-4 h-4 bg-green-900 rounded flex items-center justify-center">
+                <svg class="w-3 h-3 text-green-200" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+              </div>
+              <span>Hideout</span>
+            </span>
+          </label>
+        </div>
       </div>
       
     </div>
@@ -342,6 +378,10 @@ const completedTasks = ref({})
 const searchQuery = ref('')
 const { debouncedValue: debouncedSearchQuery, setValue: setDebouncedSearch } = useDebounce('', 300)
 
+// Filter states
+const showTasks = ref(true)
+const showHideout = ref(true)
+
 // Initialize item requirements composable
 const { baseGroupedItemRequirements } = useItemRequirements({
   showNonKappaTasks,
@@ -377,13 +417,37 @@ const handleSearchInput = (event) => {
   setDebouncedSearch(value)
 }
 
-// Apply search filter to grouped requirements
+// Apply search and filter to grouped requirements
 const groupedItemRequirements = computed(() => {
+  let filtered = baseGroupedItemRequirements.value
+  
+  // Filter by source type (tasks/hideout)
+  if (!showTasks.value || !showHideout.value) {
+    filtered = filtered.map(item => ({
+      ...item,
+      sources: item.sources.filter(source => {
+        if (source.source === 'task' && !showTasks.value) return false
+        if (source.source === 'hideout' && !showHideout.value) return false
+        return true
+      })
+    })).filter(item => item.sources.length > 0)
+  }
+  
+  // Apply search filter
   return filterGroupedItemRequirements(
-    baseGroupedItemRequirements.value,
+    filtered,
     debouncedSearchQuery.value
   )
 })
+
+// Toggle functions for checkboxes
+const toggleTasks = () => {
+  showTasks.value = !showTasks.value
+}
+
+const toggleHideout = () => {
+  showHideout.value = !showHideout.value
+}
 
 // Check if an item has the required quantity
 const isItemCompleted = (itemId, requiredQuantity) => {
