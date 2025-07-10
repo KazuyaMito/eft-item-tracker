@@ -61,12 +61,11 @@ export default defineNuxtConfig({
   },
   
   sitemap: {
-    sources: [
-      '/',
-      '/items', 
-      '/tasks',
-      '/hideout'
-    ]
+    xsl: false,
+    defaults: {
+      changefreq: 'weekly',
+      priority: 0.8
+    }
   },
   
   runtimeConfig: {
