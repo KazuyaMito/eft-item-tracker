@@ -1,4 +1,4 @@
-import { tasks } from '~/data/tasks'
+import { eftTasks } from '~/data/tasks'
 import { hideoutStations } from '~/data/hideout'
 
 export const useUserStatistics = () => {
@@ -42,7 +42,7 @@ export const useUserStatistics = () => {
       ).length
       
       // Get total tasks count
-      const totalTasksCount = tasks.length
+      const totalTasksCount = eftTasks.length
 
       // Get hideout progress
       const hideoutProgress = await getUserHideoutProgress(currentUserId.value)
@@ -87,7 +87,7 @@ export const useUserStatistics = () => {
         totalItems: 0,
         totalFIRItems: 0,
         completedTasks: 0,
-        totalTasks: tasks.length,
+        totalTasks: eftTasks.length,
         averageHideoutLevel: 0,
         maxHideoutLevel: 0,
         loading: false

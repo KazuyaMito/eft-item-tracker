@@ -74,10 +74,10 @@
             >
               <div class="flex-1">
                 <span class="text-sm font-medium text-dark-text">{{ task.name }}</span>
-                <div class="text-xs text-dark-text-secondary">{{ task.traderName }}</div>
+                <div class="text-xs text-dark-text-secondary">{{ task.trader }}</div>
               </div>
               <div class="text-xs text-dark-text-secondary">
-                Level {{ task.minLevel }}
+                Level {{ task.level }}
               </div>
             </div>
           </div>
@@ -122,7 +122,7 @@
 </template>
 
 <script setup>
-import { tasks } from '~/data/tasks'
+import { eftTasks } from '~/data/tasks'
 import { hideoutStations } from '~/data/hideout'
 
 const { user, loading, signInWithGoogle, continueAsGuest, isGuest } = useAuth()
@@ -136,14 +136,14 @@ const { currentUserId } = useCurrentUser()
 const nextTasks = computed(() => {
   if (statistics.value.loading || !currentUserId.value) return []
   
-  return tasks
+  return eftTasks
     .filter(task => {
       // Filter by player level
-      if (task.minLevel > playerLevel.value) return false
+      if (task.level > playerLevel.value) return false
       // You could add more filtering logic here based on task completion status
       return true
     })
-    .sort((a, b) => a.minLevel - b.minLevel)
+    .sort((a, b) => a.level - b.level)
     .slice(0, 5)
 })
 
