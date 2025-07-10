@@ -4,7 +4,6 @@ export const useSettings = () => {
   
   const showNonKappaTasks = ref(true)
   const gameEdition = ref('Standard Edition')
-  const hardcoreMode = ref(false)
   let unsubscribe: (() => void) | null = null
 
   // Load settings from Firebase
@@ -18,9 +17,6 @@ export const useSettings = () => {
       }
       if (settings.gameEdition !== undefined) {
         gameEdition.value = settings.gameEdition
-      }
-      if (settings.hardcoreMode !== undefined) {
-        hardcoreMode.value = settings.hardcoreMode
       }
     } catch (error) {
       console.error('Failed to load user settings:', error)
@@ -56,19 +52,6 @@ export const useSettings = () => {
     }
   }
 
-  const saveHardcoreMode = async (value: boolean) => {
-    hardcoreMode.value = value
-    
-    if (!user.value) return
-    
-    try {
-      await saveUserSettings(user.value.uid, {
-        hardcoreMode: value
-      })
-    } catch (error) {
-      console.error('Failed to save user settings:', error)
-    }
-  }
 
   // Watch for settings changes
   const startWatchingSettings = () => {
@@ -80,9 +63,6 @@ export const useSettings = () => {
       }
       if (settings.gameEdition !== undefined) {
         gameEdition.value = settings.gameEdition
-      }
-      if (settings.hardcoreMode !== undefined) {
-        hardcoreMode.value = settings.hardcoreMode
       }
     })
   }
@@ -105,7 +85,6 @@ export const useSettings = () => {
     } else {
       showNonKappaTasks.value = true
       gameEdition.value = 'Standard Edition'
-      hardcoreMode.value = false
     }
   }, { immediate: true })
 
@@ -117,9 +96,7 @@ export const useSettings = () => {
   return {
     showNonKappaTasks: readonly(showNonKappaTasks),
     gameEdition: readonly(gameEdition),
-    hardcoreMode: readonly(hardcoreMode),
     saveShowNonKappaTasks,
-    saveGameEdition,
-    saveHardcoreMode
+    saveGameEdition
   }
 }

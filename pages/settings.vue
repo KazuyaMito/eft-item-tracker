@@ -74,46 +74,6 @@
           </div>
         </div>
 
-        <!-- Hardcore Mode Section -->
-        <div class="border-b border-dark-surface pb-6">
-          <h2 class="text-xl font-semibold text-dark-text mb-4">Game Mode</h2>
-          
-          <div class="flex items-center justify-between">
-            <div>
-              <label class="text-dark-text font-medium">Hardcore Mode</label>
-              <p class="text-sm text-dark-text-secondary mt-1">
-                Doubles hideout item requirements for hardcore mode
-              </p>
-            </div>
-            
-            <button 
-              @click="toggleHardcoreMode"
-              :class="[
-                'flex items-center justify-center w-12 h-12 rounded-lg transition-colors duration-200',
-                hardcoreMode ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'
-              ]"
-            >
-              <svg 
-                v-if="hardcoreMode"
-                class="w-6 h-6 text-white" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <svg 
-                v-else
-                class="w-6 h-6 text-white" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
 
         <!-- Wipe Reset Section -->
         <div>
@@ -193,7 +153,7 @@
 </template>
 
 <script setup>
-const { showNonKappaTasks, gameEdition, hardcoreMode, saveShowNonKappaTasks, saveGameEdition, saveHardcoreMode } = useSettings()
+const { showNonKappaTasks, gameEdition, saveShowNonKappaTasks, saveGameEdition } = useSettings()
 const { user } = useAuth()
 const { resetAllUserData } = useFirestore()
 
@@ -208,9 +168,6 @@ const handleGameEditionChange = (event) => {
   saveGameEdition(event.target.value)
 }
 
-const toggleHardcoreMode = () => {
-  saveHardcoreMode(!hardcoreMode.value)
-}
 
 const handleWipeReset = async () => {
   if (!user.value) return
