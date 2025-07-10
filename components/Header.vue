@@ -75,6 +75,23 @@
                 <span class="hidden sm:inline">Logout</span>
               </button>
             </div>
+            <div v-else-if="isGuest" class="flex items-center space-x-2 md:space-x-4">
+              <div class="w-6 h-6 md:w-8 md:h-8 rounded-full bg-dark-surface flex items-center justify-center">
+                <svg class="w-4 h-4 text-dark-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <span class="text-sm text-dark-text hidden sm:inline">Guest</span>
+              <button 
+                @click="logout" 
+                class="btn btn-secondary text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 flex items-center gap-1 md:gap-2"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span class="hidden sm:inline">Exit Guest</span>
+              </button>
+            </div>
             <button 
               v-else 
               @click="signInWithGoogle" 
@@ -92,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-const { user, loading, signInWithGoogle, logout } = useAuth()
+const { user, loading, signInWithGoogle, logout, isGuest } = useAuth()
 const { playerLevel, setPlayerLevel, incrementLevel, decrementLevel, getLevelBadgeUrl } = usePlayerLevel()
 
 const handleLevelInput = (event: Event) => {

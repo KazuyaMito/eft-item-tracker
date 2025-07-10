@@ -54,11 +54,16 @@
       
     </div>
 
-    <div v-if="!user" class="text-center py-8">
-      <p class="text-dark-text-secondary mb-4">Please sign in to track your items</p>
-      <button @click="signInWithGoogle" class="btn btn-primary">
-        Sign in with Google
-      </button>
+    <div v-if="!user && !isGuest" class="text-center py-8">
+      <p class="text-dark-text-secondary mb-4">Please sign in or continue as guest to track your items</p>
+      <div class="space-y-2">
+        <button @click="signInWithGoogle" class="btn btn-primary block mx-auto">
+          Sign in with Google
+        </button>
+        <button @click="continueAsGuest" class="btn btn-secondary block mx-auto">
+          Continue as Guest
+        </button>
+      </div>
     </div>
 
     <div v-else class="space-y-4">
@@ -365,8 +370,9 @@ import { useItemQuantity } from '~/composables/useItemQuantity'
 import { useDebounce } from '~/composables/useDebounce'
 import { hideoutStations } from '~/data/hideout'
 
-const { user, signInWithGoogle } = useAuth()
+const { user, signInWithGoogle, continueAsGuest, isGuest } = useAuth()
 const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress } = useFirestore()
+const { currentUserId, isLoggedIn } = useCurrentUser()
 const { getUserTaskStatuses } = useTaskCompletion()
 const { showNonKappaTasks } = useSettings()
 const { isMobile } = useBreakpoint()
@@ -401,8 +407,8 @@ const {
   clearQuantities
 } = useItemQuantity({
   onUpdate: async (itemId, quantity) => {
-    if (!user.value) return
-    await updateUserItemCollection(user.value.uid, itemId, {
+    if (!currentUserId.value) return
+    await updateUserItemCollection(currentUserId.value, itemId, {
       quantity: quantity.total,
       foundInRaid: quantity.foundInRaid,
       notes: quantity.notes || ''
@@ -493,16 +499,16 @@ const getHideoutStationName = (sourceId) => {
 
 // Wrapper for saveQuantity to ensure user is authenticated
 const saveQuantity = async (itemId) => {
-  if (!user.value) return
+  if (!currentUserId.value) return
   await saveQuantityInternal(itemId)
 }
 
 // Load user items from Firestore
 const loadUserItems = async () => {
-  if (!user.value) return
+  if (!currentUserId.value) return
   
   try {
-    const userItems = await getUserItemCollection(user.value.uid)
+    const userItems = await getUserItemCollection(currentUserId.value)
     const quantities = {}
     
     userItems.forEach(item => {
@@ -521,10 +527,10 @@ const loadUserItems = async () => {
 
 // Load hideout progress from Firestore
 const loadHideoutProgress = async () => {
-  if (!user.value) return
+  if (!currentUserId.value) return
   
   try {
-    const progress = await getUserHideoutProgress(user.value.uid)
+    const progress = await getUserHideoutProgress(currentUserId.value)
     
     // Convert old boolean format to new level format
     const levels = {}
@@ -549,7 +555,7 @@ const loadHideoutProgress = async () => {
 
 // Load completed tasks from Firestore
 const loadCompletedTasks = async () => {
-  if (!user.value) return
+  if (!currentUserId.value) return
   
   try {
     const taskStatuses = await getUserTaskStatuses()
@@ -565,8 +571,8 @@ const loadCompletedTasks = async () => {
 }
 
 // Watch for user changes
-watch(user, (newUser) => {
-  if (newUser) {
+watch(currentUserId, (newUserId) => {
+  if (newUserId) {
     loadUserItems()
     loadHideoutProgress()
     loadCompletedTasks()
