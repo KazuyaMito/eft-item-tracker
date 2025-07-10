@@ -13,8 +13,14 @@ import {
 } from 'firebase/firestore'
 export const useFirestore = () => {
   const { $firebase } = useNuxtApp()
+  const { isGuest } = useAuth()
+  const guestStorage = useGuestStorage()
 
   const createUserProfile = async (userId, userData) => {
+    if (isGuest.value) {
+      return guestStorage.createUserProfile(userId, userData)
+    }
+    
     try {
       const userRef = doc($firebase.db, 'users', userId)
       await setDoc(userRef, {
@@ -30,6 +36,10 @@ export const useFirestore = () => {
   }
 
   const updateUserItemCollection = async (userId, itemId, data) => {
+    if (isGuest.value) {
+      return guestStorage.updateUserItemCollection(userId, itemId, data)
+    }
+    
     try {
       const collectionRef = doc($firebase.db, 'userItems', `${userId}_${itemId}`)
       await setDoc(collectionRef, {
@@ -45,6 +55,10 @@ export const useFirestore = () => {
   }
 
   const getUserItemCollection = async (userId) => {
+    if (isGuest.value) {
+      return guestStorage.getUserItemCollection(userId)
+    }
+    
     try {
       const q = query(
         collection($firebase.db, 'userItems'),
@@ -62,6 +76,10 @@ export const useFirestore = () => {
   }
 
   const watchUserItemCollection = (userId, callback) => {
+    if (isGuest.value) {
+      return guestStorage.watchUserItemCollection(userId, callback)
+    }
+    
     const q = query(
       collection($firebase.db, 'userItems'),
       where('userId', '==', userId)
@@ -77,6 +95,10 @@ export const useFirestore = () => {
   }
 
   const saveUserHideoutProgress = async (userId, stationLevelKey, completed) => {
+    if (isGuest.value) {
+      return guestStorage.saveUserHideoutProgress(userId, stationLevelKey, completed)
+    }
+    
     try {
       const progressRef = doc($firebase.db, 'userHideoutProgress', userId)
       await setDoc(progressRef, {
@@ -90,6 +112,10 @@ export const useFirestore = () => {
   }
 
   const getUserHideoutProgress = async (userId) => {
+    if (isGuest.value) {
+      return guestStorage.getUserHideoutProgress(userId)
+    }
+    
     try {
       const progressRef = doc($firebase.db, 'userHideoutProgress', userId)
       const docSnap = await getDoc(progressRef)
@@ -107,6 +133,10 @@ export const useFirestore = () => {
   }
 
   const saveUserSettings = async (userId, settings) => {
+    if (isGuest.value) {
+      return guestStorage.saveUserSettings(userId, settings)
+    }
+    
     try {
       const settingsRef = doc($firebase.db, 'userSettings', userId)
       await setDoc(settingsRef, {
@@ -120,6 +150,10 @@ export const useFirestore = () => {
   }
 
   const getUserSettings = async (userId) => {
+    if (isGuest.value) {
+      return guestStorage.getUserSettings(userId)
+    }
+    
     try {
       const settingsRef = doc($firebase.db, 'userSettings', userId)
       const docSnap = await getDoc(settingsRef)
@@ -137,6 +171,10 @@ export const useFirestore = () => {
   }
 
   const watchUserSettings = (userId, callback) => {
+    if (isGuest.value) {
+      return guestStorage.watchUserSettings(userId, callback)
+    }
+    
     const settingsRef = doc($firebase.db, 'userSettings', userId)
     
     return onSnapshot(settingsRef, (doc) => {
@@ -151,6 +189,10 @@ export const useFirestore = () => {
   }
 
   const saveUserTaskObjectives = async (userId, objectiveKey, completed) => {
+    if (isGuest.value) {
+      return guestStorage.saveUserTaskObjectives(userId, objectiveKey, completed)
+    }
+    
     try {
       const objectivesRef = doc($firebase.db, 'userTaskObjectives', userId)
       await setDoc(objectivesRef, {
@@ -164,6 +206,10 @@ export const useFirestore = () => {
   }
 
   const getUserTaskObjectives = async (userId) => {
+    if (isGuest.value) {
+      return guestStorage.getUserTaskObjectives(userId)
+    }
+    
     try {
       const objectivesRef = doc($firebase.db, 'userTaskObjectives', userId)
       const docSnap = await getDoc(objectivesRef)
@@ -181,6 +227,10 @@ export const useFirestore = () => {
   }
 
   const saveCompletedTask = async (userId, taskId, completed) => {
+    if (isGuest.value) {
+      return guestStorage.saveCompletedTask(userId, taskId, completed)
+    }
+    
     try {
       const tasksRef = doc($firebase.db, 'userCompletedTasks', userId)
       await setDoc(tasksRef, {
@@ -194,6 +244,10 @@ export const useFirestore = () => {
   }
 
   const getCompletedTasks = async (userId) => {
+    if (isGuest.value) {
+      return guestStorage.getCompletedTasks(userId)
+    }
+    
     try {
       const tasksRef = doc($firebase.db, 'userCompletedTasks', userId)
       const docSnap = await getDoc(tasksRef)
@@ -211,6 +265,10 @@ export const useFirestore = () => {
   }
 
   const reduceItemsForTask = async (userId, requirements) => {
+    if (isGuest.value) {
+      return guestStorage.reduceItemsForTask(userId, requirements)
+    }
+    
     try {
       // Process each requirement and reduce the quantities
       for (const requirement of requirements) {
@@ -258,6 +316,10 @@ export const useFirestore = () => {
   }
 
   const reduceItemsForHideout = async (userId, requirements) => {
+    if (isGuest.value) {
+      return guestStorage.reduceItemsForHideout(userId, requirements)
+    }
+    
     try {
       // Process each requirement and reduce the quantities (hideout items are always FIR)
       for (const requirement of requirements) {
@@ -287,6 +349,10 @@ export const useFirestore = () => {
   }
 
   const savePlayerLevel = async (userId, level) => {
+    if (isGuest.value) {
+      return guestStorage.savePlayerLevel(userId, level)
+    }
+    
     try {
       const userRef = doc($firebase.db, 'users', userId)
       await updateDoc(userRef, {
@@ -300,6 +366,10 @@ export const useFirestore = () => {
   }
 
   const getPlayerLevel = async (userId) => {
+    if (isGuest.value) {
+      return guestStorage.getPlayerLevel(userId)
+    }
+    
     try {
       const userRef = doc($firebase.db, 'users', userId)
       const docSnap = await getDoc(userRef)
@@ -316,6 +386,10 @@ export const useFirestore = () => {
   }
 
   const resetAllUserData = async (userId) => {
+    if (isGuest.value) {
+      return guestStorage.resetAllUserData(userId)
+    }
+    
     try {
       // Reset user items
       const userItemsQuery = query(

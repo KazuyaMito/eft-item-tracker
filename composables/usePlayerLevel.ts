@@ -1,19 +1,22 @@
 export const usePlayerLevel = () => {
-  const { user } = useAuth()
+  const { user, isGuest } = useAuth()
   const { savePlayerLevel, getPlayerLevel, createUserProfile } = useFirestore()
+  const { GUEST_USER_ID } = useGuestStorage()
   
   const playerLevel = useState<number>('playerLevel', () => 1)
   const loading = useState<boolean>('playerLevelLoading', () => true)
 
   // Load player level from Firestore when user changes
   watchEffect(async () => {
-    if (user.value?.uid) {
+    if (user.value?.uid || isGuest.value) {
       loading.value = true
       try {
-        const level = await getPlayerLevel(user.value.uid)
+        const userId = user.value?.uid || GUEST_USER_ID
+        const level = await getPlayerLevel(userId)
+        
         // If getPlayerLevel returns 1 and the user document doesn't exist,
-        // we need to create the user profile
-        if (level === 1) {
+        // we need to create the user profile (only for authenticated users)
+        if (level === 1 && user.value?.uid) {
           // Check if this is a new user by trying to get the user document
           const { $firebase } = useNuxtApp()
           const { doc, getDoc } = await import('firebase/firestore')
@@ -46,9 +49,10 @@ export const usePlayerLevel = () => {
     const clampedLevel = Math.max(1, Math.min(79, level))
     playerLevel.value = clampedLevel
     
-    if (user.value?.uid) {
+    if (user.value?.uid || isGuest.value) {
       try {
-        await savePlayerLevel(user.value.uid, clampedLevel)
+        const userId = user.value?.uid || GUEST_USER_ID
+        await savePlayerLevel(userId, clampedLevel)
       } catch (error) {
         console.error('Failed to save player level:', error)
       }

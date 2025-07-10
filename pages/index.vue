@@ -1,24 +1,36 @@
 <template>
   <div class="space-y-8">
-    <div v-if="!user && !loading" class="text-center py-16">
+    <div v-if="!user && !loading && !isGuest" class="text-center py-16">
       <h2 class="text-3xl font-bold text-dark-text mb-4">
         Welcome to EFT Item Tracker
       </h2>
       <p class="text-xl text-dark-text-secondary mb-8">
         Track your Escape from Tarkov item collection for tasks and hideout upgrades
       </p>
-      <button @click="signInWithGoogle" class="btn btn-primary text-lg px-8 py-3">
-        Get Started with Google
-      </button>
+      <div class="space-y-4">
+        <button @click="signInWithGoogle" class="btn btn-primary text-lg px-8 py-3 block mx-auto">
+          Sign in with Google
+        </button>
+        <button @click="continueAsGuest" class="btn btn-secondary text-lg px-8 py-3 block mx-auto">
+          Continue as Guest
+        </button>
+        <p class="text-sm text-dark-text-secondary max-w-md mx-auto">
+          Guest mode allows you to use all features locally. Your data won't be saved to the cloud.
+        </p>
+      </div>
     </div>
 
-    <div v-else-if="user" class="space-y-6">
+    <div v-else-if="user || isGuest" class="space-y-6">
       <div class="bg-dark-card rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-bold text-dark-text mb-4">
-          Welcome back, {{ user.displayName }}!
+          <span v-if="user">Welcome back, {{ user.displayName }}!</span>
+          <span v-else>Welcome to EFT Item Tracker!</span>
         </h2>
         <p class="text-dark-text-secondary">
           Track your item collection progress for tasks and hideout upgrades.
+          <span v-if="isGuest" class="text-yellow-500">
+            (Guest mode - data stored locally)
+          </span>
         </p>
       </div>
 
@@ -70,7 +82,7 @@
 </template>
 
 <script setup>
-const { user, loading, signInWithGoogle } = useAuth()
+const { user, loading, signInWithGoogle, continueAsGuest, isGuest } = useAuth()
 
 // SEO Meta tags
 useSeoMeta({
