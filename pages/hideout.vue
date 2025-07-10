@@ -313,7 +313,7 @@
                         isMobile ? 'text-base' : 'text-lg',
                         getProgressClass(requirement)
                       ]">
-                        {{ getUserItemCount(requirement.itemId, true) }} / {{ getRequiredQuantity(requirement) }}
+                        {{ getUserItemCount(requirement.itemId, true) }} / {{ requirement.quantity }}
                       </div>
                       <div class="text-xs text-dark-text-secondary">
                         {{ getProgressPercentage(requirement) }}%
@@ -371,7 +371,7 @@ import { getItemById } from '~/data/items'
 
 const { user, signInWithGoogle } = useAuth()
 const { getUserItemCollection, saveUserHideoutProgress, getUserHideoutProgress, reduceItemsForHideout } = useFirestore()
-const { gameEdition, hardcoreMode } = useSettings()
+const { gameEdition } = useSettings()
 const { isMobile } = useBreakpoint()
 
 const userItems = ref({})
@@ -396,14 +396,9 @@ const getUserItemCount = (itemId, foundInRaid) => {
   return foundInRaid ? (item.foundInRaid || 0) : (item.quantity || 0)
 }
 
-const getRequiredQuantity = (requirement) => {
-  const baseQuantity = requirement.quantity
-  return hardcoreMode.value ? baseQuantity * 2 : baseQuantity
-}
-
 const getProgressClass = (requirement) => {
   const current = getUserItemCount(requirement.itemId, true)
-  const needed = getRequiredQuantity(requirement)
+  const needed = requirement.quantity
   
   if (current >= needed) return 'text-green-600'
   if (current > 0) return 'text-yellow-600'
@@ -412,7 +407,7 @@ const getProgressClass = (requirement) => {
 
 const getProgressPercentage = (requirement) => {
   const current = getUserItemCount(requirement.itemId, true)
-  const needed = getRequiredQuantity(requirement)
+  const needed = requirement.quantity
   
   return Math.min(Math.round((current / needed) * 100), 100)
 }
@@ -452,12 +447,7 @@ const upgradeStation = async (stationId, newLevel) => {
   try {
     // First reduce the required items from user's inventory
     if (levelObj.requirements && levelObj.requirements.length > 0) {
-      // Apply hardcore mode multiplier to requirements before reducing items
-      const adjustedRequirements = levelObj.requirements.map(req => ({
-        ...req,
-        quantity: getRequiredQuantity(req)
-      }))
-      await reduceItemsForHideout(user.value.uid, adjustedRequirements)
+      await reduceItemsForHideout(user.value.uid, levelObj.requirements)
     }
     
     // Then save the hideout progress
