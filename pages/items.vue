@@ -423,14 +423,22 @@ const groupedItemRequirements = computed(() => {
   
   // Filter by source type (tasks/hideout)
   if (!showTasks.value || !showHideout.value) {
-    filtered = filtered.map(item => ({
-      ...item,
-      sources: item.sources.filter(source => {
+    filtered = filtered.map(item => {
+      const filteredSources = item.sources.filter(source => {
         if (source.source === 'task' && !showTasks.value) return false
         if (source.source === 'hideout' && !showHideout.value) return false
         return true
       })
-    })).filter(item => item.sources.length > 0)
+      
+      // Recalculate totalQuantity based on filtered sources
+      const newTotalQuantity = filteredSources.reduce((total, source) => total + source.quantity, 0)
+      
+      return {
+        ...item,
+        sources: filteredSources,
+        totalQuantity: newTotalQuantity
+      }
+    }).filter(item => item.sources.length > 0)
   }
   
   // Apply search filter
