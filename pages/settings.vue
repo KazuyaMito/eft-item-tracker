@@ -73,13 +73,132 @@
             </button>
           </div>
         </div>
+
+        <!-- Hardcore Mode Section -->
+        <div class="border-b border-dark-surface pb-6">
+          <h2 class="text-xl font-semibold text-dark-text mb-4">Game Mode</h2>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="text-dark-text font-medium">Hardcore Mode</label>
+              <p class="text-sm text-dark-text-secondary mt-1">
+                Doubles hideout item requirements for hardcore mode
+              </p>
+            </div>
+            
+            <button 
+              @click="toggleHardcoreMode"
+              :class="[
+                'flex items-center justify-center w-12 h-12 rounded-lg transition-colors duration-200',
+                hardcoreMode ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-600 hover:bg-gray-700'
+              ]"
+            >
+              <svg 
+                v-if="hardcoreMode"
+                class="w-6 h-6 text-white" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <svg 
+                v-else
+                class="w-6 h-6 text-white" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Wipe Reset Section -->
+        <div>
+          <h2 class="text-xl font-semibold text-dark-text mb-4">Wipe Reset</h2>
+          
+          <div class="bg-red-900/20 border border-red-600/30 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+              <svg class="w-6 h-6 text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.965-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <div class="flex-1">
+                <h3 class="text-lg font-medium text-red-400 mb-2">Reset All Progress</h3>
+                <p class="text-sm text-dark-text-secondary mb-4">
+                  This action will permanently delete all your progress including items, hideout upgrades, task completion, and player level. This cannot be undone.
+                </p>
+                <button 
+                  @click="showWipeConfirmation = true"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
+                >
+                  Reset All Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wipe Confirmation Modal -->
+    <div 
+      v-if="showWipeConfirmation"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click="showWipeConfirmation = false"
+    >
+      <div 
+        class="bg-dark-card rounded-lg shadow-lg p-6 max-w-md w-full mx-4"
+        @click.stop
+      >
+        <div class="flex items-center space-x-3 mb-4">
+          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.965-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <h3 class="text-xl font-semibold text-red-400">Confirm Wipe Reset</h3>
+        </div>
+        
+        <p class="text-dark-text mb-6">
+          Are you sure you want to reset all your progress? This will permanently delete:
+        </p>
+        
+        <ul class="text-sm text-dark-text-secondary mb-6 space-y-1">
+          <li>• All item collections and quantities</li>
+          <li>• Hideout upgrade progress</li>
+          <li>• Task completion status</li>
+          <li>• Player level (reset to 1)</li>
+        </ul>
+        
+        <p class="text-red-400 font-medium mb-6">This action cannot be undone!</p>
+        
+        <div class="flex space-x-3">
+          <button 
+            @click="showWipeConfirmation = false"
+            class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200"
+          >
+            Cancel
+          </button>
+          <button 
+            @click="handleWipeReset"
+            :disabled="isResetting"
+            class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors duration-200"
+          >
+            {{ isResetting ? 'Resetting...' : 'Reset All Data' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-const { showNonKappaTasks, gameEdition, saveShowNonKappaTasks, saveGameEdition } = useSettings()
+const { showNonKappaTasks, gameEdition, hardcoreMode, saveShowNonKappaTasks, saveGameEdition, saveHardcoreMode } = useSettings()
+const { user } = useAuth()
+const { resetAllUserData } = useFirestore()
+
+const showWipeConfirmation = ref(false)
+const isResetting = ref(false)
 
 const toggleShowNonKappaTasks = () => {
   saveShowNonKappaTasks(!showNonKappaTasks.value)
@@ -87,6 +206,24 @@ const toggleShowNonKappaTasks = () => {
 
 const handleGameEditionChange = (event) => {
   saveGameEdition(event.target.value)
+}
+
+const toggleHardcoreMode = () => {
+  saveHardcoreMode(!hardcoreMode.value)
+}
+
+const handleWipeReset = async () => {
+  if (!user.value) return
+  
+  try {
+    isResetting.value = true
+    await resetAllUserData(user.value.uid)
+    showWipeConfirmation.value = false
+  } catch (error) {
+    console.error('Failed to reset user data:', error)
+  } finally {
+    isResetting.value = false
+  }
 }
 
 // SEO Meta tags
