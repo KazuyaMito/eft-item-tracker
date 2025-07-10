@@ -15,10 +15,10 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-dark-card rounded-lg shadow-md p-6">
+        <div class="bg-dark-card rounded-lg shadow-md p-6 min-h-[140px] flex flex-col justify-between">
           <h3 class="text-lg font-semibold text-dark-text mb-2">Items Collected</h3>
           <div v-if="statistics.loading" class="text-3xl font-bold text-green-600">
-            <div class="animate-pulse">...</div>
+            <div class="animate-pulse bg-green-600 h-9 w-16 rounded"></div>
           </div>
           <div v-else class="text-3xl font-bold text-green-600">
             {{ statistics.totalFIRItems }}
@@ -29,10 +29,10 @@
           </div>
         </div>
         
-        <div class="bg-dark-card rounded-lg shadow-md p-6">
+        <div class="bg-dark-card rounded-lg shadow-md p-6 min-h-[140px] flex flex-col justify-between">
           <h3 class="text-lg font-semibold text-dark-text mb-2">Tasks Progress</h3>
           <div v-if="statistics.loading" class="text-3xl font-bold text-blue-600">
-            <div class="animate-pulse">...</div>
+            <div class="animate-pulse bg-blue-600 h-9 w-20 rounded"></div>
           </div>
           <div v-else class="text-3xl font-bold text-blue-600">
             {{ statistics.completedTasks }}/{{ statistics.totalTasks }}
@@ -43,10 +43,10 @@
           </div>
         </div>
         
-        <div class="bg-dark-card rounded-lg shadow-md p-6">
+        <div class="bg-dark-card rounded-lg shadow-md p-6 min-h-[140px] flex flex-col justify-between">
           <h3 class="text-lg font-semibold text-dark-text mb-2">Hideout Level</h3>
           <div v-if="statistics.loading" class="text-3xl font-bold text-purple-600">
-            <div class="animate-pulse">...</div>
+            <div class="animate-pulse bg-purple-600 h-9 w-12 rounded"></div>
           </div>
           <div v-else class="text-3xl font-bold text-purple-600">
             {{ statistics.averageHideoutLevel }}

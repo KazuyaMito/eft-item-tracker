@@ -68,7 +68,7 @@
         <!-- PC Layout -->
         <div v-if="!isMobile" class="flex items-center justify-between">
           <div class="flex items-center space-x-4 flex-1">
-            <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div class="w-16 h-16 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0 aspect-square">
               <NuxtImg 
                 v-if="groupedItem.itemIconLink"
                 :src="groupedItem.itemIconLink"
