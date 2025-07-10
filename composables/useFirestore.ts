@@ -315,6 +315,42 @@ export const useFirestore = () => {
     }
   }
 
+  const resetAllUserData = async (userId) => {
+    try {
+      // Reset user items
+      const userItemsQuery = query(
+        collection($firebase.db, 'userItems'),
+        where('userId', '==', userId)
+      )
+      const userItemsSnapshot = await getDocs(userItemsQuery)
+      for (const doc of userItemsSnapshot.docs) {
+        await deleteDoc(doc.ref)
+      }
+
+      // Reset hideout progress
+      const hideoutProgressRef = doc($firebase.db, 'userHideoutProgress', userId)
+      await deleteDoc(hideoutProgressRef)
+
+      // Reset task objectives
+      const taskObjectivesRef = doc($firebase.db, 'userTaskObjectives', userId)
+      await deleteDoc(taskObjectivesRef)
+
+      // Reset completed tasks
+      const completedTasksRef = doc($firebase.db, 'userCompletedTasks', userId)
+      await deleteDoc(completedTasksRef)
+
+      // Reset player level to 1
+      const userRef = doc($firebase.db, 'users', userId)
+      await updateDoc(userRef, {
+        playerLevel: 1,
+        updatedAt: serverTimestamp()
+      })
+    } catch (error) {
+      console.error('Error resetting user data:', error)
+      throw error
+    }
+  }
+
   return {
     createUserProfile,
     updateUserItemCollection,
@@ -332,6 +368,7 @@ export const useFirestore = () => {
     reduceItemsForTask,
     reduceItemsForHideout,
     savePlayerLevel,
-    getPlayerLevel
+    getPlayerLevel,
+    resetAllUserData
   }
 }
