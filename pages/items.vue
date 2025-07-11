@@ -54,7 +54,18 @@
       
     </div>
 
-    <div class="space-y-4">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center space-y-4">
+        <div class="relative">
+          <div class="w-12 h-12 border-4 border-dark-surface border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="text-dark-text-secondary text-sm">Loading items...</p>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <div v-else class="space-y-4">
       <ItemCard
         v-for="groupedItem in groupedItemRequirements"
         :key="groupedItem.itemId"
@@ -66,6 +77,17 @@
         :decrement-quantity="decrementQuantity"
         :save-quantity="saveQuantity"
       />
+      
+      <!-- No items found message -->
+      <div v-if="groupedItemRequirements.length === 0" class="text-center py-12">
+        <div class="bg-dark-card rounded-lg p-8">
+          <svg class="w-16 h-16 mx-auto mb-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m0 0V9a2 2 0 012-2h2m-4 4v4m0-4h.01"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-dark-text mb-2">No items found</h3>
+          <p class="text-dark-text-secondary">Try adjusting your search or filter settings.</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -87,6 +109,10 @@ const { isMobile } = useBreakpoint()
 // Progress for filtering requirements
 const hideoutProgress = ref({})
 const completedTasks = ref({})
+
+// Loading states
+const isLoading = ref(true)
+const isLoadingUserData = ref(false)
 
 const searchQuery = ref('')
 const { debouncedValue: debouncedSearchQuery, setValue: setDebouncedSearch } = useDebounce('', 300)
@@ -215,6 +241,7 @@ const loadUserItems = async () => {
   if (!currentUserId.value) return
   
   try {
+    isLoadingUserData.value = true
     const userItems = await getUserItemCollection(currentUserId.value)
     const quantities = {}
     
@@ -229,6 +256,8 @@ const loadUserItems = async () => {
     loadQuantities(quantities)
   } catch (error) {
     console.error('Failed to load user items:', error)
+  } finally {
+    isLoadingUserData.value = false
   }
 }
 
@@ -277,16 +306,44 @@ const loadCompletedTasks = async () => {
   }
 }
 
+// Load all user data
+const loadAllUserData = async () => {
+  if (!currentUserId.value) {
+    isLoading.value = false
+    return
+  }
+  
+  isLoading.value = true
+  
+  try {
+    await Promise.all([
+      loadUserItems(),
+      loadHideoutProgress(),
+      loadCompletedTasks()
+    ])
+  } catch (error) {
+    console.error('Failed to load user data:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 // Watch for user changes
 watch(currentUserId, (newUserId) => {
   if (newUserId) {
-    loadUserItems()
-    loadHideoutProgress()
-    loadCompletedTasks()
+    loadAllUserData()
   } else {
     clearQuantities()
     hideoutProgress.value = {}
     completedTasks.value = {}
+    isLoading.value = false
+  }
+}, { immediate: true })
+
+// Check if base item requirements are loaded
+watch(baseGroupedItemRequirements, (newItems) => {
+  if (!currentUserId.value && newItems.length > 0) {
+    isLoading.value = false
   }
 }, { immediate: true })
 
