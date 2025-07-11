@@ -68,291 +68,25 @@
 
     <div class="space-y-4">
       <template v-for="station in hideoutStations" :key="station.id">
-        <div
+        <HideoutStationCard
           v-if="getFilteredLevels(station).length > 0"
-          :class="[
-            'bg-dark-card rounded-lg shadow-md',
-            isMobile ? 'p-4' : 'p-6'
-          ]"
-        >
-        <!-- PC Layout -->
-        <div v-if="!isMobile" class="mb-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 bg-dark-surface rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img 
-                  v-if="station.imageLink"
-                  :src="station.imageLink"
-                  :alt="station.name"
-                  class="w-full h-full object-cover"
-                  @error="$event.target.style.display='none'"
-                />
-                <svg v-else class="w-6 h-6 text-dark-text-secondary" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-dark-text">{{ station.name }}</h3>
-                <p class="text-sm text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
-              </div>
-            </div>
-            <div class="flex items-center space-x-4">
-              <div class="text-right">
-                <div class="text-sm font-medium" :class="getStationProgressClass(station)">
-                  {{ getStationCompletedLevels(station) }} / {{ station.levels.length }} levels
-                </div>
-                <div class="text-xs text-dark-text-secondary">
-                  {{ getStationProgressPercentage(station) }}% Complete
-                </div>
-              </div>
-              <div class="flex items-center space-x-2">
-                <button
-                  v-if="canUpgradeStation(station)"
-                  @click="upgradeStation(station.id, getStationCurrentLevel(station.id) + 1)"
-                  class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  Upgrade to Level {{ getStationCurrentLevel(station.id) + 1 }}
-                </button>
-                <button
-                  v-if="getStationCurrentLevel(station.id) > 0"
-                  @click="downgradeStation(station.id, getStationCurrentLevel(station.id) - 1)"
-                  class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors"
-                >
-                  Downgrade
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mobile Layout -->
-        <div v-else class="mb-4">
-          <div class="space-y-3">
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 bg-dark-surface rounded flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img 
-                  v-if="station.imageLink"
-                  :src="station.imageLink"
-                  :alt="station.name"
-                  class="w-full h-full object-cover"
-                  @error="$event.target.style.display='none'"
-                />
-                <svg v-else class="w-4 h-4 text-dark-text-secondary" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-base font-semibold text-dark-text">{{ station.name }}</h3>
-                <p class="text-xs text-dark-text-secondary">Current Level: {{ getStationCurrentLevel(station.id) }}</p>
-              </div>
-            </div>
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-sm font-medium" :class="getStationProgressClass(station)">
-                  {{ getStationCompletedLevels(station) }} / {{ station.levels.length }}
-                </div>
-                <div class="text-xs text-dark-text-secondary">
-                  {{ getStationProgressPercentage(station) }}% Complete
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <button
-                  v-if="canUpgradeStation(station)"
-                  @click="upgradeStation(station.id, getStationCurrentLevel(station.id) + 1)"
-                  class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-colors"
-                >
-                  Upgrade L{{ getStationCurrentLevel(station.id) + 1 }}
-                </button>
-                <button
-                  v-if="getStationCurrentLevel(station.id) > 0"
-                  @click="downgradeStation(station.id, getStationCurrentLevel(station.id) - 1)"
-                  class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors"
-                >
-                  Down
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="space-y-4">
-          <div
-            v-for="level in getFilteredLevels(station)"
-            :key="level.level"
-            :class="[
-              'border rounded-lg',
-              isMobile ? 'p-3' : 'p-4',
-              getFilteredLevelClasses(station.id, level)
-            ]"
-          >
-            <div :class="[
-              'flex items-center justify-between',
-              isMobile ? 'mb-2' : 'mb-3'
-            ]">
-              <div>
-                <h4 :class="[
-                  'font-medium text-dark-text',
-                  isMobile ? 'text-sm' : ''
-                ]">Level {{ level.level }}</h4>
-                <span :class="[
-                  'text-dark-text-secondary',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">
-                  Construction Time: {{ level.constructionTime }}
-                </span>
-              </div>
-              <div class="text-right">
-                <div v-if="getStationCurrentLevel(station.id) === level.level" :class="[
-                  'text-green-400 font-medium',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">
-                  Current Level
-                </div>
-                <div v-else-if="getStationCurrentLevel(station.id) > level.level" :class="[
-                  'text-green-400',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">
-                  Completed
-                </div>
-                <div v-else-if="getStationCurrentLevel(station.id) === level.level - 1 && isLevelBuildable(station.id, level)" :class="[
-                  'text-blue-400',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">
-                  Ready to build
-                </div>
-                <div v-else-if="!isLevelBuildable(station.id, level)" :class="[
-                  'text-red-400',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">
-                  Prerequisites not met
-                </div>
-              </div>
-            </div>
-            
-            <div class="space-y-3">
-              <!-- Station Prerequisites -->
-              <div v-if="level.stationLevelRequirements && level.stationLevelRequirements.length > 0">
-                <h5 :class="[
-                  'font-medium text-dark-text mb-2',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">Station Prerequisites:</h5>
-                <div class="space-y-2">
-                  <div
-                    v-for="requirement in level.stationLevelRequirements"
-                    :key="requirement.stationId"
-                    class="flex items-center justify-between p-2 bg-dark-surface rounded-lg"
-                  >
-                    <div class="flex items-center space-x-3">
-                      <div class="text-sm font-medium text-dark-text">
-                        {{ requirement.stationName }} Level {{ requirement.level }}
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-sm" :class="isStationLevelComplete(requirement.stationId, requirement.level) ? 'text-green-600' : 'text-red-600'">
-                        {{ isStationLevelComplete(requirement.stationId, requirement.level) ? 'Complete' : 'Incomplete' }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Item Requirements -->
-              <div>
-                <h5 :class="[
-                  'font-medium text-dark-text mb-2',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">Item Requirements:</h5>
-                <div class="space-y-2">
-                  <div
-                    v-for="requirement in level.requirements"
-                    :key="requirement.id"
-                    :class="[
-                      'flex items-center justify-between bg-dark-surface rounded-lg',
-                      isMobile ? 'p-2' : 'p-3'
-                    ]"
-                  >
-                    <div class="flex items-center" :class="isMobile ? 'space-x-2' : 'space-x-3'">
-                      <div :class="[
-                        'bg-dark-surface rounded flex items-center justify-center overflow-hidden',
-                        isMobile ? 'w-8 h-8' : 'w-10 h-10'
-                      ]">
-                        <img 
-                          v-if="requirement.itemIconLink"
-                          :src="requirement.itemIconLink"
-                          :alt="requirement.itemName || getItemName(requirement.itemId)"
-                          class="w-full h-full object-cover"
-                          @error="$event.target.style.display='none'"
-                        />
-                        <span v-else class="text-xs text-dark-text-secondary">IMG</span>
-                      </div>
-                      <div>
-                        <p :class="[
-                          'font-medium text-dark-text',
-                          isMobile ? 'text-sm' : ''
-                        ]">
-                          {{ requirement.itemName || getItemName(requirement.itemId) }}
-                        </p>
-                        <p :class="[
-                          'text-dark-text-secondary',
-                          isMobile ? 'text-xs' : 'text-sm'
-                        ]">
-                          Found in Raid required
-                        </p>
-                      </div>
-                    </div>
-                    <div class="text-right">
-                      <div :class="[
-                        'font-semibold',
-                        isMobile ? 'text-base' : 'text-lg',
-                        getProgressClass(requirement)
-                      ]">
-                        {{ getUserItemCount(requirement.itemId, true) }} / {{ requirement.quantity }}
-                      </div>
-                      <div class="text-xs text-dark-text-secondary">
-                        {{ getProgressPercentage(requirement) }}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Skill Requirements -->
-              <div v-if="level.skillRequirements && level.skillRequirements.length > 0">
-                <h5 :class="[
-                  'font-medium text-dark-text mb-2',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">Skill Requirements:</h5>
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="requirement in level.skillRequirements"
-                    :key="requirement.skillId"
-                    class="inline-block px-2 py-1 text-xs bg-purple-900 text-purple-200 rounded"
-                  >
-                    {{ requirement.skillName }} Level {{ requirement.level }}
-                  </span>
-                </div>
-              </div>
-              
-              <!-- Trader Requirements -->
-              <div v-if="level.traderRequirements && level.traderRequirements.length > 0">
-                <h5 :class="[
-                  'font-medium text-dark-text mb-2',
-                  isMobile ? 'text-xs' : 'text-sm'
-                ]">Trader Requirements:</h5>
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="requirement in level.traderRequirements"
-                    :key="requirement.traderId"
-                    class="inline-block px-2 py-1 text-xs bg-orange-900 text-orange-200 rounded"
-                  >
-                    {{ requirement.traderName }} Level {{ requirement.level }}
-                  </span>
-                </div>
-              </div>
-            </div>
-            </div>
-        </div>
-        </div>
+          :station="station"
+          :current-level="getStationCurrentLevel(station.id)"
+          :completed-levels="getStationCompletedLevels(station)"
+          :progress-percentage="getStationProgressPercentage(station)"
+          :progress-class="getStationProgressClass(station)"
+          :can-upgrade="canUpgradeStation(station)"
+          :filtered-levels="getFilteredLevels(station)"
+          :is-mobile="isMobile"
+          :is-level-buildable="isLevelBuildable"
+          :is-station-level-complete="isStationLevelComplete"
+          :get-item-name="getItemName"
+          :get-progress-class="getProgressClass"
+          :get-progress-percentage="getProgressPercentage"
+          :get-user-item-count="getUserItemCount"
+          @upgrade="upgradeStation"
+          @downgrade="downgradeStation"
+        />
       </template>
     </div>
   </div>
@@ -413,7 +147,39 @@ const getStationStartingLevel = (stationId) => {
       return 4
     }
   }
+  
+  // Cultist Circle starting level based on game edition
+  if (stationId === 'cultist-circle') {
+    if (gameEdition.value === 'The Unheard Edition') {
+      return 1
+    }
+  }
+  
   return 0
+}
+
+const updateStationLevelForEdition = async (stationId, levels) => {
+  const startingLevel = getStationStartingLevel(stationId)
+  if (startingLevel > 0 && levels[stationId] === undefined) {
+    levels[stationId] = startingLevel
+    // Save the starting level to Firestore
+    await saveUserHideoutProgress(user.value.uid, stationId, startingLevel)
+  }
+}
+
+const updateStationLevelOnEditionChange = async (stationId) => {
+  const newStartingLevel = getStationStartingLevel(stationId)
+  const currentLevel = stationLevels.value[stationId] || 0
+  
+  // Only update if the new starting level is higher than current level
+  if (newStartingLevel > currentLevel) {
+    stationLevels.value[stationId] = newStartingLevel
+    try {
+      await saveUserHideoutProgress(user.value.uid, stationId, newStartingLevel)
+    } catch (error) {
+      console.error(`Failed to update ${stationId} level:`, error)
+    }
+  }
 }
 
 const getStationCurrentLevel = (stationId) => {
@@ -690,13 +456,9 @@ const loadHideoutProgress = async () => {
     })
     
     // Set starting levels based on game edition
-    if (levels.stash === undefined) {
-      const startingLevel = getStationStartingLevel('stash')
-      if (startingLevel > 0) {
-        levels.stash = startingLevel
-        // Save the starting level to Firestore
-        await saveUserHideoutProgress(user.value.uid, 'stash', startingLevel)
-      }
+    const editionBasedStations = ['stash', 'cultist-circle']
+    for (const stationId of editionBasedStations) {
+      await updateStationLevelForEdition(stationId, levels)
     }
     
     stationLevels.value = levels
@@ -716,21 +478,14 @@ watch(user, (newUser) => {
   }
 }, { immediate: true })
 
-// Watch for game edition changes and update stash level if needed
+// Watch for game edition changes and update station levels if needed
 watch(gameEdition, async (newEdition) => {
   if (!user.value) return
   
-  const newStartingLevel = getStationStartingLevel('stash')
-  const currentStashLevel = stationLevels.value.stash || 0
-  
-  // Only update if the new starting level is higher than current level
-  if (newStartingLevel > currentStashLevel) {
-    stationLevels.value.stash = newStartingLevel
-    try {
-      await saveUserHideoutProgress(user.value.uid, 'stash', newStartingLevel)
-    } catch (error) {
-      console.error('Failed to update stash level:', error)
-    }
+  // Update all edition-based stations
+  const editionBasedStations = ['stash', 'cultist-circle']
+  for (const stationId of editionBasedStations) {
+    await updateStationLevelOnEditionChange(stationId)
   }
 })
 
