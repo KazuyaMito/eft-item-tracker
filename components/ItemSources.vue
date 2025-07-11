@@ -65,6 +65,8 @@
 </template>
 
 <script setup>
+import { hideoutStations } from '~/data/hideout'
+
 const props = defineProps({
   sources: {
     type: Array,
@@ -89,13 +91,17 @@ const getTraderInitial = (traderName) => {
 
 const getHideoutImage = (sourceId) => {
   if (!sourceId) return ''
-  // This will be loaded dynamically, return empty for now
-  return ''
+  const stationId = sourceId.split('_')[0]
+  
+  // Get image from API
+  const station = hideoutStations.find(s => s.normalizedName === stationId)
+  return station ? station.imageLink || '' : ''
 }
 
 const getHideoutStationName = (sourceId) => {
   if (!sourceId) return 'Hideout'
   const stationId = sourceId.split('_')[0]
-  return stationId || 'Hideout'
+  const station = hideoutStations.find(s => s.id === stationId)
+  return station ? station.name : 'Hideout'
 }
 </script>
