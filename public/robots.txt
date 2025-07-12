@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://eft-item-tracker-441d2.web.app/sitemap.xml
+Sitemap: https://eft-item-tracker.site/sitemap.xml
