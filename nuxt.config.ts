@@ -68,7 +68,7 @@ export default defineNuxtConfig({
         { name: 'twitter:description', content: 'Escape from Tarkov のアイテム管理ツール' }
       ],
       link: [
-        { rel: 'canonical', href: 'https://eft-item-tracker-441d2.web.app' },
+        { rel: 'canonical', href: 'https://eft-item-tracker.site' },
         { rel: 'preconnect', href: 'https://assets.tarkov.dev' },
         { rel: 'preconnect', href: 'https://firebaseapp.com' },
         { rel: 'preconnect', href: 'https://googleapis.com' },
@@ -96,7 +96,7 @@ export default defineNuxtConfig({
   },
   
   site: {
-    url: 'https://eft-item-tracker-441d2.web.app',
+    url: 'https://eft-item-tracker.site',
   },
   
   sitemap: {
