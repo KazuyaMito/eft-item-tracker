@@ -93,11 +93,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useItemRequirements, filterGroupedItemRequirements } from '~/composables/useItemRequirements'
 import { useItemQuantity } from '~/composables/useItemQuantity'
 import { useDebounce } from '~/composables/useDebounce'
-import { hideoutStations } from '~/data/hideout'
+import { hideoutStations, ensureHideoutData } from '~/data/hideout'
 
 const { user, signInWithGoogle, continueAsGuest, isGuest } = useAuth()
 const { updateUserItemCollection, getUserItemCollection, getUserHideoutProgress } = useFirestore()
@@ -327,6 +327,15 @@ const loadAllUserData = async () => {
     isLoading.value = false
   }
 }
+
+// Initialize hideout data on mount
+onMounted(async () => {
+  try {
+    await ensureHideoutData()
+  } catch (error) {
+    console.error('Failed to load hideout data in items page:', error)
+  }
+})
 
 // Watch for user changes
 watch(currentUserId, (newUserId) => {

@@ -54,52 +54,68 @@ const fetchHideout = async () => {
     const { getHideout } = useTarkovAPI()
     const stations = await getHideout()
     
-    // Create a map of API ID to normalizedName for station requirements
-    const idToNormalizedMap = new Map()
-    stations.forEach((station: any) => {
-      idToNormalizedMap.set(station.id, station.normalizedName || station.id)
-    })
-    
-    cachedStations = stations.map((station: any) => ({
-      id: station.normalizedName || station.id,
-      name: station.name,
-      normalizedName: station.normalizedName,
-      imageLink: station.imageLink,
-      levels: station.levels?.map((level: any) => ({
-        level: level.level,
-        constructionTime: level.constructionTime || '0 minutes',
-        description: level.description,
-        requirements: level.itemRequirements?.map((req: any, index: number) => ({
-          id: `${station.normalizedName || station.id}_${level.level}_${index}`,
-          stationId: station.normalizedName || station.id,
+    if (stations && stations.length > 0) {
+      // Create a map of API ID to normalizedName for station requirements
+      const idToNormalizedMap = new Map()
+      stations.forEach((station: any) => {
+        idToNormalizedMap.set(station.id, station.normalizedName || station.id)
+      })
+      
+      cachedStations = stations.map((station: any) => ({
+        id: station.normalizedName || station.id,
+        name: station.name,
+        normalizedName: station.normalizedName,
+        imageLink: station.imageLink,
+        levels: station.levels?.map((level: any) => ({
           level: level.level,
-          itemId: req.item.id,
-          itemName: req.item.name,
-          itemIconLink: req.item.iconLink,
-          quantity: req.count || 1
-        })) || [],
-        stationLevelRequirements: level.stationLevelRequirements?.map((req: any) => ({
-          stationId: idToNormalizedMap.get(req.station.id) || req.station.id,
-          stationName: req.station.name,
-          level: req.level
-        })) || [],
-        skillRequirements: level.skillRequirements?.map((req: any) => ({
-          skillId: req.skill.id,
-          skillName: req.skill.name,
-          level: req.level
-        })) || [],
-        traderRequirements: level.traderRequirements?.map((req: any) => ({
-          traderId: req.trader.id,
-          traderName: req.trader.name,
-          level: req.level
-        })) || [],
-        crafts: level.crafts || []
-      })) || []
-    }))
+          constructionTime: level.constructionTime || '0 minutes',
+          description: level.description,
+          requirements: level.itemRequirements?.map((req: any, index: number) => {
+            if (!req || !req.item) return null
+            return {
+              id: `${station.normalizedName || station.id}_${level.level}_${index}`,
+              stationId: station.normalizedName || station.id,
+              level: level.level,
+              itemId: req.item.id,
+              itemName: req.item.name,
+              itemIconLink: req.item.iconLink,
+              quantity: req.count || 1
+            }
+          }).filter(req => req !== null) || [],
+          stationLevelRequirements: level.stationLevelRequirements?.map((req: any) => {
+            if (!req || !req.station) return null
+            return {
+              stationId: idToNormalizedMap.get(req.station.id) || req.station.id,
+              stationName: req.station.name,
+              level: req.level
+            }
+          }).filter(req => req !== null) || [],
+          skillRequirements: level.skillRequirements?.map((req: any) => {
+            if (!req || !req.skill) return null
+            return {
+              skillId: req.skill.id,
+              skillName: req.skill.name,
+              level: req.level
+            }
+          }).filter(req => req !== null) || [],
+          traderRequirements: level.traderRequirements?.map((req: any) => {
+            if (!req || !req.trader) return null
+            return {
+              traderId: req.trader.id,
+              traderName: req.trader.name,
+              level: req.level
+            }
+          }).filter(req => req !== null) || [],
+          crafts: level.crafts || []
+        })) || []
+      }))
+      
+      lastFetchTime = now
+      hideoutStations.splice(0, hideoutStations.length, ...cachedStations)
+      return cachedStations
+    }
     
-    lastFetchTime = now
-    hideoutStations.splice(0, hideoutStations.length, ...cachedStations)
-    return cachedStations
+    return []
   } catch (error) {
     console.error('Failed to fetch hideout data from Tarkov API:', error)
     return []
