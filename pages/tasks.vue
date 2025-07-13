@@ -14,7 +14,18 @@
       @toggle-tasks-above-level="showTasksAboveLevel = !showTasksAboveLevel"
     />
 
-    <div class="space-y-4">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center space-y-4">
+        <div class="relative">
+          <div class="w-12 h-12 border-4 border-dark-surface border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="text-dark-text-secondary text-sm">Loading tasks...</p>
+      </div>
+    </div>
+
+    <!-- Tasks List -->
+    <div v-else-if="filteredTasks.length > 0" class="space-y-4">
       <TaskCard
         v-for="task in filteredTasks"
         :key="task.id"
@@ -37,6 +48,17 @@
         @uncomplete="uncompleteTask"
         @toggle-objective="toggleObjective"
       />
+    </div>
+    
+    <!-- No tasks found message -->
+    <div v-else class="text-center py-12">
+      <div class="bg-dark-card rounded-lg p-8">
+        <svg class="w-16 h-16 mx-auto mb-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <h3 class="text-lg font-semibold text-dark-text mb-2">No tasks found</h3>
+        <p class="text-dark-text-secondary">Try adjusting your filter settings or check your player level.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -75,6 +97,7 @@ const selectedCategory = ref('all') // 'all', 'traders'
 const traderScroll = ref(null)
 const traderData = ref([])
 const showTasksAboveLevel = ref(false)
+const isLoading = ref(true)
 
 const traders = computed(() => {
   const traderList = [...new Set(eftTasks.map(task => task.trader))]
@@ -333,9 +356,20 @@ watch(user, (newUser) => {
   }
 }, { immediate: true })
 
+// Watch for tasks to be loaded
+watch(() => eftTasks.length, (newLength) => {
+  if (newLength > 0 && isLoading.value) {
+    isLoading.value = false
+  }
+}, { immediate: true })
+
 // Load trader data on mount
-onMounted(() => {
-  loadTraderData()
+onMounted(async () => {
+  try {
+    await loadTraderData()
+  } catch (error) {
+    console.error('Failed to load trader data:', error)
+  }
 })
 
 // SEO Meta tags

@@ -66,7 +66,18 @@
       </div>
     </div>
 
-    <div class="space-y-4">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center space-y-4">
+        <div class="relative">
+          <div class="w-12 h-12 border-4 border-dark-surface border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="text-dark-text-secondary text-sm">Loading hideout stations...</p>
+      </div>
+    </div>
+
+    <!-- Hideout Stations List -->
+    <div v-else-if="hideoutStations.length > 0" class="space-y-4">
       <template v-for="station in hideoutStations" :key="station.id">
         <HideoutStationCard
           v-if="getFilteredLevels(station).length > 0"
@@ -89,6 +100,17 @@
         />
       </template>
     </div>
+    
+    <!-- No stations found message -->
+    <div v-else class="text-center py-12">
+      <div class="bg-dark-card rounded-lg p-8">
+        <svg class="w-16 h-16 mx-auto mb-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+        <h3 class="text-lg font-semibold text-dark-text mb-2">No hideout stations found</h3>
+        <p class="text-dark-text-secondary">Failed to load hideout data. Please try refreshing the page.</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -108,6 +130,7 @@ const userItems = ref({})
 const hideoutProgress = ref({})
 const stationLevels = ref({}) // Store current level for each station
 const currentFilter = ref('available')
+const isLoading = ref(true)
 
 const getItemName = (itemId) => {
   const item = getItemById(itemId)
@@ -476,6 +499,7 @@ const loadHideoutProgress = async () => {
 // Initialize hideout data
 onMounted(async () => {
   try {
+    isLoading.value = true
     const { getHideout } = useTarkovAPI()
     const directResult = await getHideout()
     
@@ -539,6 +563,8 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to load hideout data:', error)
+  } finally {
+    isLoading.value = false
   }
 })
 
