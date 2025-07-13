@@ -1,3 +1,4 @@
+import { reactive } from 'vue'
 import type { HideoutRequirement } from '~/types'
 
 export interface HideoutStation {
@@ -108,6 +109,14 @@ const fetchHideout = async () => {
 // Initialize hideout on first access
 if (typeof window !== 'undefined') {
   fetchHideout()
+}
+
+// Ensure data is available for SSR and client-side
+export const ensureHideoutData = async () => {
+  if (hideoutStations.length === 0) {
+    await fetchHideout()
+  }
+  return hideoutStations
 }
 
 export const getStationById = (id: string) => {
