@@ -66,7 +66,18 @@
       </div>
     </div>
 
-    <div class="space-y-4">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex items-center justify-center py-12">
+      <div class="flex flex-col items-center space-y-4">
+        <div class="relative">
+          <div class="w-12 h-12 border-4 border-dark-surface border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        <p class="text-dark-text-secondary text-sm">Loading hideout stations...</p>
+      </div>
+    </div>
+
+    <!-- Hideout Stations List -->
+    <div v-else-if="hideoutStations.length > 0" class="space-y-4">
       <template v-for="station in hideoutStations" :key="station.id">
         <HideoutStationCard
           v-if="getFilteredLevels(station).length > 0"
@@ -89,12 +100,25 @@
         />
       </template>
     </div>
+    
+    <!-- No stations found message -->
+    <div v-else class="text-center py-12">
+      <div class="bg-dark-card rounded-lg p-8">
+        <svg class="w-16 h-16 mx-auto mb-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+        <h3 class="text-lg font-semibold text-dark-text mb-2">No hideout stations found</h3>
+        <p class="text-dark-text-secondary">Failed to load hideout data. Please try refreshing the page.</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { hideoutStations } from '~/data/hideout'
+import { onMounted } from 'vue'
+import { hideoutStations, ensureHideoutData } from '~/data/hideout'
 import { getItemById } from '~/data/items'
+
 
 const { user, signInWithGoogle } = useAuth()
 const { currentUserId, isLoggedIn } = useCurrentUser()
@@ -106,6 +130,7 @@ const userItems = ref({})
 const hideoutProgress = ref({})
 const stationLevels = ref({}) // Store current level for each station
 const currentFilter = ref('available')
+const isLoading = ref(true)
 
 const getItemName = (itemId) => {
   const item = getItemById(itemId)
@@ -292,6 +317,10 @@ const areStationRequirementsMet = (stationLevelRequirements) => {
   }
   
   return stationLevelRequirements.every(req => {
+    // Add null/undefined check
+    if (!req || !req.stationId) {
+      return false
+    }
     return isStationLevelComplete(req.stationId, req.level)
   })
 }
@@ -466,6 +495,78 @@ const loadHideoutProgress = async () => {
     console.error('Failed to load hideout progress:', error)
   }
 }
+
+// Initialize hideout data
+onMounted(async () => {
+  try {
+    isLoading.value = true
+    const { getHideout } = useTarkovAPI()
+    const directResult = await getHideout()
+    
+    if (directResult && directResult.length > 0) {
+      // Create a map of API ID to normalizedName for station requirements
+      const idToNormalizedMap = new Map()
+      directResult.forEach((station) => {
+        idToNormalizedMap.set(station.id, station.normalizedName || station.id)
+      })
+      
+      const transformedStations = directResult.map((station) => ({
+        id: station.normalizedName || station.id,
+        name: station.name,
+        normalizedName: station.normalizedName,
+        imageLink: station.imageLink,
+        levels: station.levels?.map((level) => ({
+          level: level.level,
+          constructionTime: level.constructionTime || '0 minutes',
+          description: level.description,
+          requirements: level.itemRequirements?.map((req, index) => {
+            if (!req || !req.item) return null
+            return {
+              id: `${station.normalizedName || station.id}_${level.level}_${index}`,
+              stationId: station.normalizedName || station.id,
+              level: level.level,
+              itemId: req.item.id,
+              itemName: req.item.name,
+              itemIconLink: req.item.iconLink,
+              quantity: req.count || 1
+            }
+          }).filter(req => req !== null) || [],
+          stationLevelRequirements: level.stationLevelRequirements?.map((req) => {
+            if (!req || !req.station) return null
+            return {
+              stationId: idToNormalizedMap.get(req.station.id) || req.station.id,
+              stationName: req.station.name,
+              level: req.level
+            }
+          }).filter(req => req !== null) || [],
+          skillRequirements: level.skillRequirements?.map((req) => {
+            if (!req || !req.skill) return null
+            return {
+              skillId: req.skill.id,
+              skillName: req.skill.name,
+              level: req.level
+            }
+          }).filter(req => req !== null) || [],
+          traderRequirements: level.traderRequirements?.map((req) => {
+            if (!req || !req.trader) return null
+            return {
+              traderId: req.trader.id,
+              traderName: req.trader.name,
+              level: req.level
+            }
+          }).filter(req => req !== null) || [],
+          crafts: level.crafts || []
+        })) || []
+      }))
+      
+      hideoutStations.splice(0, hideoutStations.length, ...transformedStations)
+    }
+  } catch (error) {
+    console.error('Failed to load hideout data:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 
 watch(user, (newUser) => {
   if (newUser) {

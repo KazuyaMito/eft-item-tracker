@@ -49,8 +49,8 @@ export const useAuth = () => {
         isGuest.value = false
       } else {
         user.value = null
-        // Automatically enable guest mode for unauthenticated users
-        isGuest.value = true
+        // Don't automatically enable guest mode - let user choose
+        // isGuest.value = true
       }
       loading.value = false
     })
