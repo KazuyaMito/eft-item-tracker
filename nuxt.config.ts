@@ -3,7 +3,37 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
-  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/sitemap', '@nuxt/image'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/sitemap', '@nuxt/image', '@nuxtjs/i18n'],
+  
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'en',
+    locales: [
+      {
+        code: 'en',
+        iso: 'en-US',
+        name: 'English',
+        file: 'en.json',
+        flag: 'US'
+      },
+      {
+        code: 'ja',
+        iso: 'ja-JP',
+        name: '日本語',
+        file: 'ja.json',
+        flag: 'JP'
+      }
+    ],
+    langDir: 'locales',
+    lazy: false,
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+      alwaysRedirect: true,
+      fallbackLocale: 'en'
+    }
+  },
   
   nitro: {
     prerender: {
@@ -43,7 +73,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: {
-        lang: 'ja'
+        lang: 'en'
       },
       title: 'EFT Item Tracker - Escape from Tarkov アイテム管理ツール',
       meta: [
@@ -60,7 +90,7 @@ export default defineNuxtConfig({
         { property: 'og:title', content: 'EFT Item Tracker - Escape from Tarkov アイテム管理ツール' },
         { property: 'og:description', content: 'Escape from Tarkov のアイテム、タスク、ハイドアウトを効率的に管理するツール' },
         { property: 'og:type', content: 'website' },
-        { property: 'og:locale', content: 'ja_JP' },
+        { property: 'og:locale', content: 'en_US' },
         
         // Twitter Card
         { name: 'twitter:card', content: 'summary' },
@@ -68,11 +98,12 @@ export default defineNuxtConfig({
         { name: 'twitter:description', content: 'Escape from Tarkov のアイテム管理ツール' }
       ],
       link: [
-        { rel: 'canonical', href: 'https://eft-item-tracker-441d2.web.app' },
+        { rel: 'canonical', href: 'https://eft-item-tracker.site' },
         { rel: 'preconnect', href: 'https://assets.tarkov.dev' },
         { rel: 'preconnect', href: 'https://firebaseapp.com' },
         { rel: 'preconnect', href: 'https://googleapis.com' },
-        { rel: 'dns-prefetch', href: 'https://assets.tarkov.dev' }
+        { rel: 'dns-prefetch', href: 'https://assets.tarkov.dev' },
+        { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css' }
       ],
       script: [
         {
@@ -96,7 +127,7 @@ export default defineNuxtConfig({
   },
   
   site: {
-    url: 'https://eft-item-tracker-441d2.web.app',
+    url: 'https://eft-item-tracker.site',
   },
   
   sitemap: {

@@ -8,7 +8,7 @@
           active-class="border-blue-400 text-blue-400"
           inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
         >
-          Items
+          {{ $t('navigation.items') }}
         </NuxtLink>
         <NuxtLink
           to="/tasks"
@@ -16,7 +16,7 @@
           active-class="border-blue-400 text-blue-400"
           inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
         >
-          Tasks
+          {{ $t('navigation.tasks') }}
         </NuxtLink>
         <NuxtLink
           to="/hideout"
@@ -24,7 +24,7 @@
           active-class="border-blue-400 text-blue-400"
           inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
         >
-          Hideout
+          {{ $t('navigation.hideout') }}
         </NuxtLink>
         <NuxtLink
           to="/settings"
@@ -32,12 +32,13 @@
           active-class="border-blue-400 text-blue-400"
           inactive-class="border-transparent text-dark-text-secondary hover:text-dark-text hover:border-dark-surface"
         >
-          Settings
+          {{ $t('navigation.settings') }}
         </NuxtLink>
       </div>
     </div>
   </nav>
 </template>
+
 
 <style scoped>
 .scrollbar-hide {

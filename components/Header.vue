@@ -10,23 +10,24 @@
           </NuxtLink>
           <nav class="hidden md:flex space-x-6">
             <NuxtLink to="/" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
-              Dashboard
+              {{ $t('navigation.home') }}
             </NuxtLink>
             <NuxtLink to="/items" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
-              Items
+              {{ $t('navigation.items') }}
             </NuxtLink>
             <NuxtLink to="/tasks" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
-              Tasks
+              {{ $t('navigation.tasks') }}
             </NuxtLink>
             <NuxtLink to="/hideout" class="text-dark-text-secondary hover:text-eft-primary transition-colors">
-              Hideout
+              {{ $t('navigation.hideout') }}
             </NuxtLink>
           </nav>
         </div>
         
         <div class="flex items-center space-x-2 md:space-x-4">
+          <LanguageSwitcher />
           <div class="flex items-center space-x-1 md:space-x-2 bg-dark-surface rounded-lg px-2 md:px-3 py-1 md:py-2">
-            <span class="text-sm text-dark-text-secondary hidden sm:inline">Level</span>
+            <span class="text-sm text-dark-text-secondary hidden sm:inline">{{ $t('home.level') }}</span>
             <NuxtImg 
               :src="getLevelBadgeUrl(playerLevel)" 
               :alt="`Level ${playerLevel}`"
@@ -75,7 +76,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span class="hidden sm:inline">Logout</span>
+                <span class="hidden sm:inline">{{ $t('auth.sign_out') }}</span>
               </button>
             </div>
             <div v-else-if="isGuest" class="flex items-center space-x-2 md:space-x-4">
@@ -84,7 +85,7 @@
                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                 </svg>
               </div>
-              <span class="text-sm text-dark-text hidden sm:inline">Guest</span>
+              <span class="text-sm text-dark-text hidden sm:inline">{{ $t('auth.continue_as_guest') }}</span>
               <button 
                 @click="logout" 
                 class="btn btn-secondary text-xs md:text-sm px-2 md:px-4 py-1 md:py-2 flex items-center gap-1 md:gap-2"
@@ -92,7 +93,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span class="hidden sm:inline">Exit Guest</span>
+                <span class="hidden sm:inline">{{ $t('auth.sign_out') }}</span>
               </button>
             </div>
             <button 
@@ -100,11 +101,11 @@
               @click="signInWithGoogle" 
               class="btn btn-primary text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
             >
-              <span class="hidden sm:inline">Sign in with Google</span>
-              <span class="sm:hidden">Sign in</span>
+              <span class="hidden sm:inline">{{ $t('auth.sign_in') }}</span>
+              <span class="sm:hidden">{{ $t('auth.sign_in') }}</span>
             </button>
           </div>
-          <div v-else class="text-sm text-dark-text-secondary">Loading...</div>
+          <div v-else class="text-sm text-dark-text-secondary">{{ $t('common.loading') }}</div>
         </div>
       </div>
     </div>

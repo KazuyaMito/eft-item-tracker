@@ -1,18 +1,18 @@
 <template>
   <div class="space-y-8">
     <div class="bg-dark-card rounded-lg shadow-md p-6">
-      <h1 class="text-3xl font-bold text-dark-text mb-6">Settings</h1>
+      <h1 class="text-3xl font-bold text-dark-text mb-6">{{ $t('settings.title') }}</h1>
       
       <div class="space-y-6">
         <!-- Game Edition Section -->
         <div class="border-b border-dark-surface pb-6">
-          <h2 class="text-xl font-semibold text-dark-text mb-4">Game Edition</h2>
+          <h2 class="text-xl font-semibold text-dark-text mb-4">{{ $t('settings.game_edition') }}</h2>
           
           <div class="flex items-center justify-between">
             <div>
-              <label class="text-dark-text font-medium">Escape from Tarkov Edition</label>
+              <label class="text-dark-text font-medium">{{ $t('settings.eft_edition') }}</label>
               <p class="text-sm text-dark-text-secondary mt-1">
-                Your game edition affects hideout stash starting level
+                {{ $t('settings.game_edition_description') }}
               </p>
             </div>
             
@@ -34,13 +34,13 @@
 
         <!-- Quest Filters Section -->
         <div class="border-b border-dark-surface pb-6">
-          <h2 class="text-xl font-semibold text-dark-text mb-4">Quest Filters</h2>
+          <h2 class="text-xl font-semibold text-dark-text mb-4">{{ $t('settings.quest_filters') }}</h2>
           
           <div class="flex items-center justify-between">
             <div>
-              <label class="text-dark-text font-medium">Show non-Kappa tasks</label>
+              <label class="text-dark-text font-medium">{{ $t('settings.show_non_kappa_tasks') }}</label>
               <p class="text-sm text-dark-text-secondary mt-1">
-                Display tasks that are not required for the Kappa container
+                {{ $t('settings.show_non_kappa_tasks_description') }}
               </p>
             </div>
             
@@ -77,7 +77,7 @@
 
         <!-- Wipe Reset Section -->
         <div>
-          <h2 class="text-xl font-semibold text-dark-text mb-4">Wipe Reset</h2>
+          <h2 class="text-xl font-semibold text-dark-text mb-4">{{ $t('settings.wipe_reset') }}</h2>
           
           <div class="bg-red-900/20 border border-red-600/30 rounded-lg p-4">
             <div class="flex items-start space-x-3">
@@ -85,15 +85,15 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.965-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
               <div class="flex-1">
-                <h3 class="text-lg font-medium text-red-400 mb-2">Reset All Progress</h3>
+                <h3 class="text-lg font-medium text-red-400 mb-2">{{ $t('settings.reset_all_progress') }}</h3>
                 <p class="text-sm text-dark-text-secondary mb-4">
-                  This action will permanently delete all your progress including items, hideout upgrades, task completion, and player level. This cannot be undone.
+                  {{ $t('settings.reset_all_progress_description') }}
                 </p>
                 <button 
                   @click="showWipeConfirmation = true"
                   class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
                 >
-                  Reset All Data
+                  {{ $t('settings.reset_all_data') }}
                 </button>
               </div>
             </div>
@@ -116,35 +116,32 @@
           <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.965-.833-2.732 0L5.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
-          <h3 class="text-xl font-semibold text-red-400">Confirm Wipe Reset</h3>
+          <h3 class="text-xl font-semibold text-red-400">{{ $t('settings.confirm_wipe_reset') }}</h3>
         </div>
         
         <p class="text-dark-text mb-6">
-          Are you sure you want to reset all your progress? This will permanently delete:
+          {{ $t('settings.wipe_confirmation_message') }}
         </p>
         
-        <ul class="text-sm text-dark-text-secondary mb-6 space-y-1">
-          <li>• All item collections and quantities</li>
-          <li>• Hideout upgrade progress</li>
-          <li>• Task completion status</li>
-          <li>• Player level (reset to 1)</li>
-        </ul>
+        <div class="text-sm text-dark-text-secondary mb-6 space-y-1 whitespace-pre-line">
+          {{ $t('settings.wipe_items_list') }}
+        </div>
         
-        <p class="text-red-400 font-medium mb-6">This action cannot be undone!</p>
+        <p class="text-red-400 font-medium mb-6">{{ $t('settings.action_cannot_be_undone') }}</p>
         
         <div class="flex space-x-3">
           <button 
             @click="showWipeConfirmation = false"
             class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors duration-200"
           >
-            Cancel
+            {{ $t('common.cancel') }}
           </button>
           <button 
             @click="handleWipeReset"
             :disabled="isResetting"
             class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors duration-200"
           >
-            {{ isResetting ? 'Resetting...' : 'Reset All Data' }}
+            {{ isResetting ? $t('settings.resetting') : $t('settings.reset_all_data') }}
           </button>
         </div>
       </div>

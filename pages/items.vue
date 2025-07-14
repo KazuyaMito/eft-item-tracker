@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-6">
     <div class="bg-dark-card rounded-lg shadow-md p-6">
-      <h1 class="text-2xl font-bold text-dark-text mb-4">Item Collection</h1>
+      <h1 class="text-2xl font-bold text-dark-text mb-4">{{ $t('items.title') }}</h1>
       <p class="text-dark-text-secondary mb-6">
-        Track your items for tasks and hideout upgrades.
+        {{ $t('items.description') }}
       </p>
       
       <div class="mb-6 space-y-4">
@@ -11,7 +11,7 @@
           :value="searchQuery"
           @input="handleSearchInput"
           type="text"
-          placeholder="Search items..."
+          :placeholder="$t('items.search_placeholder')"
           class="w-full px-4 py-2 bg-dark-surface border border-dark-surface rounded-lg text-dark-text placeholder-dark-text-secondary focus:ring-2 focus:ring-blue-400 focus:border-transparent"
         >
         
@@ -29,7 +29,7 @@
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <span>Tasks</span>
+              <span>{{ $t('items.tasks') }}</span>
             </span>
           </label>
           
@@ -46,7 +46,7 @@
                   <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                 </svg>
               </div>
-              <span>Hideout</span>
+              <span>{{ $t('items.hideout') }}</span>
             </span>
           </label>
         </div>

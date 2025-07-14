@@ -1,8 +1,8 @@
 <template>
   <div class="bg-dark-card rounded-lg shadow-md p-6">
-    <h1 class="text-2xl font-bold text-dark-text mb-4">Tasks</h1>
+    <h1 class="text-2xl font-bold text-dark-text mb-4">{{ $t('tasks.title') }}</h1>
     <p class="text-dark-text-secondary mb-6">
-      Track your progress on trader tasks and see required items.
+      {{ $t('tasks.description') }}
     </p>
     
     <!-- Category filters and trader selection -->

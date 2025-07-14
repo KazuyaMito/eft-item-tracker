@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="bg-dark-card rounded-lg shadow-md p-6">
       <div class="flex items-center justify-between mb-4">
-        <h1 class="text-2xl font-bold text-dark-text">Hideout</h1>
+        <h1 class="text-2xl font-bold text-dark-text">{{ $t('hideout.title') }}</h1>
         <div class="text-right">
           <div class="text-lg font-semibold" :class="getOverallProgressClass()">
             {{ getOverallCompletedLevels() }} / {{ getTotalLevels() }} levels
@@ -13,7 +13,7 @@
         </div>
       </div>
       <p class="text-dark-text-secondary mb-4">
-        Track your hideout upgrade progress and required items.
+        {{ $t('hideout.description') }}
       </p>
       
       <!-- Filter Buttons -->

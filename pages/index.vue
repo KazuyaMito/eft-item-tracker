@@ -3,67 +3,67 @@
     <div class="space-y-6">
       <div class="bg-dark-card rounded-lg shadow-md p-6">
         <h2 class="text-2xl font-bold text-dark-text mb-4">
-          <span v-if="user">Welcome back, {{ user.displayName }}!</span>
-          <span v-else>Welcome to EFT Item Tracker!</span>
+          <span v-if="user">{{ $t('auth.welcome_back', { name: user.displayName }) }}</span>
+          <span v-else>{{ $t('auth.welcome') }}</span>
         </h2>
         <p class="text-dark-text-secondary">
-          Track your item collection progress for tasks and hideout upgrades.
+          {{ $t('home.track_description') }}
           <span v-if="!user" class="text-yellow-500">
-            (Data stored locally - Sign in to sync across devices)
+            {{ $t('auth.local_storage_note') }}
           </span>
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-dark-card rounded-lg shadow-md p-6 min-h-[140px] flex flex-col justify-between">
-          <h3 class="text-lg font-semibold text-dark-text mb-2">Items Collected</h3>
+          <h3 class="text-lg font-semibold text-dark-text mb-2">{{ $t('home.items_collected') }}</h3>
           <div v-if="statistics.loading" class="text-3xl font-bold text-green-600">
             <div class="animate-pulse bg-green-600 h-9 w-16 rounded"></div>
           </div>
           <div v-else class="text-3xl font-bold text-green-600">
             {{ statistics.totalFIRItems }}
           </div>
-          <p class="text-sm text-dark-text-secondary">Found in Raid items</p>
+          <p class="text-sm text-dark-text-secondary">{{ $t('home.found_in_raid') }}</p>
           <div v-if="!statistics.loading" class="text-xs text-dark-text-secondary mt-1">
-            Total: {{ statistics.totalItems }}
+            {{ $t('home.total') }}: {{ statistics.totalItems }}
           </div>
         </div>
         
         <div class="bg-dark-card rounded-lg shadow-md p-6 min-h-[140px] flex flex-col justify-between">
-          <h3 class="text-lg font-semibold text-dark-text mb-2">Tasks Progress</h3>
+          <h3 class="text-lg font-semibold text-dark-text mb-2">{{ $t('home.tasks_progress') }}</h3>
           <div v-if="statistics.loading" class="text-3xl font-bold text-blue-600">
             <div class="animate-pulse bg-blue-600 h-9 w-20 rounded"></div>
           </div>
           <div v-else class="text-3xl font-bold text-blue-600">
             {{ statistics.completedTasks }}/{{ statistics.totalTasks }}
           </div>
-          <p class="text-sm text-dark-text-secondary">Completed tasks</p>
+          <p class="text-sm text-dark-text-secondary">{{ $t('home.completed_tasks') }}</p>
           <div v-if="!statistics.loading" class="text-xs text-dark-text-secondary mt-1">
-            {{ Math.round((statistics.completedTasks / statistics.totalTasks) * 100) }}% complete
+            {{ Math.round((statistics.completedTasks / statistics.totalTasks) * 100) }}% {{ $t('home.complete') }}
           </div>
         </div>
         
         <div class="bg-dark-card rounded-lg shadow-md p-6 min-h-[140px] flex flex-col justify-between">
-          <h3 class="text-lg font-semibold text-dark-text mb-2">Hideout Level</h3>
+          <h3 class="text-lg font-semibold text-dark-text mb-2">{{ $t('home.hideout_level') }}</h3>
           <div v-if="statistics.loading" class="text-3xl font-bold text-purple-600">
             <div class="animate-pulse bg-purple-600 h-9 w-12 rounded"></div>
           </div>
           <div v-else class="text-3xl font-bold text-purple-600">
             {{ statistics.averageHideoutLevel }}
           </div>
-          <p class="text-sm text-dark-text-secondary">Average station level</p>
+          <p class="text-sm text-dark-text-secondary">{{ $t('home.average_station_level') }}</p>
           <div v-if="!statistics.loading" class="text-xs text-dark-text-secondary mt-1">
-            Max: {{ statistics.maxHideoutLevel }}
+            {{ $t('home.max') }}: {{ statistics.maxHideoutLevel }}
           </div>
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-dark-card rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold text-dark-text mb-4">Next Tasks</h3>
+          <h3 class="text-lg font-semibold text-dark-text mb-4">{{ $t('home.next_tasks') }}</h3>
           <div v-if="statistics.loading" class="space-y-3">
             <div class="flex items-center justify-between p-3 bg-dark-surface rounded animate-pulse">
-              <span class="text-sm">Loading...</span>
+              <span class="text-sm">{{ $t('home.loading') }}</span>
             </div>
           </div>
           <div v-else-if="nextTasks.length > 0" class="space-y-3">
@@ -77,22 +77,22 @@
                 <div class="text-xs text-dark-text-secondary">{{ task.trader }}</div>
               </div>
               <div class="text-xs text-dark-text-secondary">
-                Level {{ task.level }}
+                {{ $t('home.level') }} {{ task.level }}
               </div>
             </div>
           </div>
           <div v-else class="space-y-3">
             <div class="flex items-center justify-between p-3 bg-dark-surface rounded">
-              <span class="text-sm">No available tasks</span>
+              <span class="text-sm">{{ $t('home.no_available_tasks') }}</span>
             </div>
           </div>
         </div>
         
         <div class="bg-dark-card rounded-lg shadow-md p-6">
-          <h3 class="text-lg font-semibold text-dark-text mb-4">Hideout Upgrades</h3>
+          <h3 class="text-lg font-semibold text-dark-text mb-4">{{ $t('home.hideout_upgrades') }}</h3>
           <div v-if="statistics.loading" class="space-y-3">
             <div class="flex items-center justify-between p-3 bg-dark-surface rounded animate-pulse">
-              <span class="text-sm">Loading...</span>
+              <span class="text-sm">{{ $t('home.loading') }}</span>
             </div>
           </div>
           <div v-else-if="nextUpgrades.length > 0" class="space-y-3">
@@ -103,16 +103,16 @@
             >
               <div class="flex-1">
                 <span class="text-sm font-medium text-dark-text">{{ upgrade.stationName }}</span>
-                <div class="text-xs text-dark-text-secondary">Level {{ upgrade.level }}</div>
+                <div class="text-xs text-dark-text-secondary">{{ $t('home.level') }} {{ upgrade.level }}</div>
               </div>
               <div class="text-xs text-dark-text-secondary">
-                {{ upgrade.itemCount }} items
+                {{ upgrade.itemCount }} {{ $t('home.items') }}
               </div>
             </div>
           </div>
           <div v-else class="space-y-3">
             <div class="flex items-center justify-between p-3 bg-dark-surface rounded">
-              <span class="text-sm">No available upgrades</span>
+              <span class="text-sm">{{ $t('home.no_available_upgrades') }}</span>
             </div>
           </div>
         </div>
